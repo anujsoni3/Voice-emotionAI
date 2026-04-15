@@ -35,6 +35,14 @@ voice_mapper = VoiceMapper()
 tts_service = TTSService(output_dir=OUTPUTS_DIR)
 
 
+def _resolve_tts_service() -> TTSService:
+    """Return a request-scoped TTS service so .env changes are reflected without stale settings."""
+    global tts_service
+    if isinstance(tts_service, TTSService):
+        return TTSService(output_dir=OUTPUTS_DIR)
+    return tts_service
+
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
@@ -68,6 +76,7 @@ async def generate(
     compare_mode: bool = Form(False),
     sentence_mode: bool = Form(False),
 ) -> HTMLResponse:
+    current_tts_service = _resolve_tts_service()
     cleaned_text = text.strip()
     selected_intensity = intensity_mode if intensity_mode in {"auto", "mild", "moderate", "strong"} else "auto"
     selected_persona = persona if persona in {"support", "sales", "executive"} else "support"
@@ -100,7 +109,7 @@ async def generate(
     try:
         analysis = emotion_service.analyze(cleaned_text, intensity_override=intensity_override)
         voice_profile = voice_mapper.map_emotion(analysis, persona=selected_persona)
-        synthesis = tts_service.synthesize_to_file(cleaned_text, voice_profile, persona=selected_persona)
+        synthesis = current_tts_service.synthesize_to_file(cleaned_text, voice_profile, persona=selected_persona)
 
         neutral_analysis = EmotionAnalysis(
             text=cleaned_text,
@@ -112,7 +121,7 @@ async def generate(
         )
         neutral_profile = voice_mapper.map_emotion(neutral_analysis, persona=selected_persona)
         neutral_synthesis = (
-            tts_service.synthesize_to_file(cleaned_text, neutral_profile, persona=selected_persona)
+            current_tts_service.synthesize_to_file(cleaned_text, neutral_profile, persona=selected_persona)
             if compare_mode
             else None
         )
@@ -122,7 +131,11 @@ async def generate(
             for idx, sentence_text in enumerate(emotion_service.split_sentences(cleaned_text), start=1):
                 sentence_analysis = emotion_service.analyze(sentence_text, intensity_override=intensity_override)
                 sentence_profile = voice_mapper.map_emotion(sentence_analysis, persona=selected_persona)
-                sentence_synthesis = tts_service.synthesize_to_file(sentence_text, sentence_profile, persona=selected_persona)
+                sentence_synthesis = current_tts_service.synthesize_to_file(
+                    sentence_text,
+                    sentence_profile,
+                    persona=selected_persona,
+                )
                 sentence_results.append(
                     {
                         "index": idx,
@@ -204,9 +217,13 @@ async def generate(
     audio_url = request.url_for("outputs", path=synthesis.file_name)
     neutral_audio_url = request.url_for("outputs", path=neutral_synthesis.file_name) if neutral_synthesis else None
     report_url = request.url_for("outputs", path=report_file_name)
-    requested_provider = tts_service.provider or "auto"
+    requested_provider = current_tts_service.provider or "auto"
     fallback_note = None
-    if requested_provider == "auto" and synthesis.provider != "elevenlabs" and tts_service.settings.elevenlabs_api_key:
+    if (
+        requested_provider == "auto"
+        and synthesis.provider != "elevenlabs"
+        and current_tts_service.settings.elevenlabs_api_key
+    ):
         fallback_note = (
             f"ElevenLabs was unavailable, so the app automatically generated audio with {synthesis.provider}."
         )
