@@ -2,6 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock
+import requests
 
 from app.models import VoiceProfile
 from app.services.tts_service import TTSService
@@ -28,6 +29,11 @@ class FakeEngine:
 
 
 class TTSServiceTests(unittest.TestCase):
+    def test_default_http_session_ignores_proxy_env(self) -> None:
+        service = TTSService(output_dir="outputs")
+
+        self.assertFalse(service.http_session.trust_env)
+
     def test_auto_provider_prefers_explicit_setting(self) -> None:
         settings = Settings(tts_provider="pyttsx3")
         service = TTSService(output_dir="outputs", settings=settings, engine_factory=FakeEngine)
@@ -117,6 +123,35 @@ class TTSServiceTests(unittest.TestCase):
             self.assertEqual(result.provider, "elevenlabs")
             self.assertTrue(result.pitch_applied)
             session.post.assert_called_once()
+
+    def test_auto_mode_falls_back_when_elevenlabs_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            response = Mock()
+            response.raise_for_status.side_effect = requests.RequestException("proxy failure")
+
+            session = Mock()
+            session.post.return_value = response
+
+            settings = Settings(tts_provider="auto", elevenlabs_api_key="test-key")
+            service = TTSService(
+                output_dir=tmp_dir,
+                settings=settings,
+                http_session=session,
+            )
+            service._synthesize_with_edge_tts = lambda text, voice_profile, output_path: output_path.write_bytes(b"edge")
+            profile = VoiceProfile(
+                emotion="happy",
+                intensity="strong",
+                rate=210,
+                volume=1.0,
+                pitch_delta=6,
+                style_note="Warm and excited.",
+            )
+
+            result = service.synthesize_to_file("Thank you for the wonderful update!", profile)
+
+            self.assertEqual(result.provider, "edge")
+            self.assertTrue(Path(result.output_path).exists())
 
 
 if __name__ == "__main__":

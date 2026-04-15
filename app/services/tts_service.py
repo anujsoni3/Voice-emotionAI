@@ -55,24 +55,43 @@ class TTSService:
         self.provider = provider or self.settings.tts_provider
         self.engine_factory = engine_factory or self._default_engine_factory
         self.http_session = http_session or requests.Session()
+        if http_session is None:
+            self.http_session.trust_env = False
 
     def synthesize_to_file(self, text: str, voice_profile: VoiceProfile) -> SynthesisResult:
         cleaned_text = text.strip()
         if not cleaned_text:
             raise ValueError("Text input cannot be empty.")
 
-        provider = self._resolve_provider()
-        output_path = self.build_output_path(cleaned_text, provider)
+        selected_provider = self.provider or "auto"
+        attempted_providers = self._provider_chain(selected_provider)
 
-        if provider == "elevenlabs":
-            self._synthesize_with_elevenlabs(cleaned_text, voice_profile, output_path)
-            pitch_applied = True
-        elif provider == "edge":
-            self._synthesize_with_edge_tts(cleaned_text, voice_profile, output_path)
-            pitch_applied = True
+        last_error: RuntimeError | None = None
+        provider_used = attempted_providers[0]
+        pitch_applied = False
+
+        for candidate in attempted_providers:
+            output_path = self.build_output_path(cleaned_text, candidate)
+            try:
+                if candidate == "elevenlabs":
+                    self._synthesize_with_elevenlabs(cleaned_text, voice_profile, output_path)
+                    pitch_applied = True
+                elif candidate == "edge":
+                    self._synthesize_with_edge_tts(cleaned_text, voice_profile, output_path)
+                    pitch_applied = True
+                else:
+                    self._synthesize_with_pyttsx3(cleaned_text, voice_profile, output_path)
+                    pitch_applied = False
+            except RuntimeError as exc:
+                last_error = exc
+                continue
+
+            provider_used = candidate
+            break
         else:
-            self._synthesize_with_pyttsx3(cleaned_text, voice_profile, output_path)
-            pitch_applied = False
+            if last_error is not None:
+                raise last_error
+            raise RuntimeError("No text-to-speech provider is available.")
 
         if not output_path.exists() or output_path.stat().st_size == 0:
             raise RuntimeError(
@@ -83,7 +102,7 @@ class TTSService:
         return SynthesisResult(
             output_path=str(output_path.resolve()),
             file_name=output_path.name,
-            provider=provider,
+            provider=provider_used,
             rate=voice_profile.rate,
             volume=voice_profile.volume,
             pitch_delta=voice_profile.pitch_delta,
@@ -114,6 +133,23 @@ class TTSService:
         if platform.startswith("win"):
             return "pyttsx3"
         return "pyttsx3"
+
+    def _provider_chain(self, provider: str) -> list[str]:
+        if provider != "auto":
+            return [provider]
+
+        chain: list[str] = []
+        if self.settings.elevenlabs_api_key:
+            chain.append("elevenlabs")
+        if edge_tts is not None:
+            chain.append("edge")
+        if platform.startswith("win"):
+            chain.append("pyttsx3")
+        elif "pyttsx3" not in chain:
+            chain.append("pyttsx3")
+
+        seen: set[str] = set()
+        return [candidate for candidate in chain if not (candidate in seen or seen.add(candidate))]
 
     def _synthesize_with_pyttsx3(self, text: str, voice_profile: VoiceProfile, output_path: Path) -> None:
         engine = self.engine_factory()
