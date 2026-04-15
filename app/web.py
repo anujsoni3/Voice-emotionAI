@@ -18,6 +18,11 @@ from app.models import EmotionAnalysis
 BASE_DIR = Path(__file__).resolve().parent.parent
 OUTPUTS_DIR = BASE_DIR / "outputs"
 OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+PERSONA_LABELS = {
+    "support": "Support Agent",
+    "sales": "Sales Rep",
+    "executive": "Executive Briefing",
+}
 
 app = FastAPI(title="The Empathy Engine", version="0.1.0")
 app.mount("/outputs", StaticFiles(directory=str(OUTPUTS_DIR)), name="outputs")
@@ -38,6 +43,7 @@ async def home(request: Request) -> HTMLResponse:
         {
             "text": "",
             "persona": "support",
+            "persona_label": PERSONA_LABELS["support"],
             "intensity_mode": "auto",
             "compare_mode": True,
             "sentence_mode": True,
@@ -65,6 +71,7 @@ async def generate(
     cleaned_text = text.strip()
     selected_intensity = intensity_mode if intensity_mode in {"auto", "mild", "moderate", "strong"} else "auto"
     selected_persona = persona if persona in {"support", "sales", "executive"} else "support"
+    selected_persona_label = PERSONA_LABELS[selected_persona]
     intensity_override = None if selected_intensity == "auto" else selected_intensity
 
     if not cleaned_text:
@@ -74,6 +81,7 @@ async def generate(
             {
                 "text": text,
                 "persona": selected_persona,
+                "persona_label": selected_persona_label,
                 "intensity_mode": selected_intensity,
                 "compare_mode": compare_mode,
                 "sentence_mode": sentence_mode,
@@ -131,6 +139,7 @@ async def generate(
             "options": {
                 "intensity_mode": selected_intensity,
                 "persona": selected_persona,
+                "persona_label": selected_persona_label,
                 "compare_mode": compare_mode,
                 "sentence_mode": sentence_mode,
             },
@@ -176,6 +185,7 @@ async def generate(
             {
                 "text": cleaned_text,
                 "persona": selected_persona,
+                "persona_label": selected_persona_label,
                 "intensity_mode": selected_intensity,
                 "compare_mode": compare_mode,
                 "sentence_mode": sentence_mode,
@@ -207,6 +217,7 @@ async def generate(
         {
             "text": cleaned_text,
             "persona": selected_persona,
+            "persona_label": selected_persona_label,
             "intensity_mode": selected_intensity,
             "compare_mode": compare_mode,
             "sentence_mode": sentence_mode,
