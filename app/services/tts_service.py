@@ -9,6 +9,7 @@ from sys import platform
 from typing import Callable
 
 from app.models import SynthesisResult, VoiceProfile
+from app.settings import Settings
 
 try:
     import edge_tts
@@ -29,12 +30,14 @@ class TTSService:
     def __init__(
         self,
         output_dir: str | Path = "outputs",
-        provider: str = "auto",
+        provider: str | None = None,
         engine_factory: Callable[[], object] | None = None,
+        settings: Settings | None = None,
     ) -> None:
+        self.settings = settings or Settings.from_env()
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.provider = provider
+        self.provider = provider or self.settings.tts_provider
         self.engine_factory = engine_factory or self._default_engine_factory
 
     def synthesize_to_file(self, text: str, voice_profile: VoiceProfile) -> SynthesisResult:

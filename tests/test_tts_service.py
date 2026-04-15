@@ -4,6 +4,7 @@ from pathlib import Path
 
 from app.models import VoiceProfile
 from app.services.tts_service import TTSService
+from app.settings import Settings
 
 
 class FakeEngine:
@@ -26,6 +27,12 @@ class FakeEngine:
 
 
 class TTSServiceTests(unittest.TestCase):
+    def test_auto_provider_prefers_explicit_setting(self) -> None:
+        settings = Settings(tts_provider="pyttsx3")
+        service = TTSService(output_dir="outputs", settings=settings, engine_factory=FakeEngine)
+
+        self.assertEqual(service._resolve_provider(), "pyttsx3")
+
     def test_build_output_path_uses_wav_and_slug_for_pyttsx3(self) -> None:
         service = TTSService(output_dir="outputs", provider="pyttsx3", engine_factory=FakeEngine)
         output_path = service.build_output_path("This is the best news ever!", provider="pyttsx3")
