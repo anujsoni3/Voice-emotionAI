@@ -247,6 +247,7 @@
 
         .quick-btn:focus-visible,
         .submit-btn:focus-visible,
+        .choice-btn:focus-visible,
         .switch input:focus-visible,
         select:focus-visible,
         textarea:focus-visible,
@@ -268,6 +269,65 @@
             padding: 11px 12px;
             display: grid;
             gap: 8px;
+        }
+        
+        .choice-group {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+        
+        .choice-btn {
+            border: 1px solid rgba(39, 54, 69, 0.2);
+            background: linear-gradient(180deg, #ffffff, #f4f8fb);
+            color: #334859;
+            border-radius: 999px;
+            padding: 7px 11px;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 140ms ease, border-color 140ms ease, transform 140ms ease, color 140ms ease;
+        }
+        
+        .choice-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(39, 54, 69, 0.35);
+            background: linear-gradient(180deg, #ffffff, #eef5fa);
+        }
+        
+        .choice-btn.active {
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 6px 14px rgba(31, 44, 56, 0.2);
+        }
+        
+        .choice-btn.persona-support.active {
+            background: linear-gradient(145deg, #2f6d58, #1f5442);
+        }
+        
+        .choice-btn.persona-sales.active {
+            background: linear-gradient(145deg, #bb5a1d, #944012);
+        }
+        
+        .choice-btn.persona-executive.active {
+            background: linear-gradient(145deg, #365f8f, #29486d);
+        }
+        
+        .choice-btn.intensity-auto.active {
+            background: linear-gradient(145deg, #4b6479, #344b5d);
+        }
+        
+        .choice-btn.intensity-mild.active {
+            background: linear-gradient(145deg, #4c7d67, #35604d);
+        }
+        
+        .choice-btn.intensity-moderate.active {
+            background: linear-gradient(145deg, #9a6228, #75471b);
+        }
+        
+        .choice-btn.intensity-strong.active {
+            background: linear-gradient(145deg, #ad3e29, #842818);
         }
 
         .control label {
@@ -551,6 +611,78 @@
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.78);
             padding: 11px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .segment-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .segment-id {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #4b5d6d;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(39, 54, 69, 0.14);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .segment-tones {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .tone-pill {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 999px;
+            text-transform: capitalize;
+            border: 1px solid transparent;
+        }
+
+        .tone-pill.emotion {
+            background: rgba(42, 96, 143, 0.11);
+            color: #2a608f;
+            border-color: rgba(42, 96, 143, 0.18);
+        }
+
+        .tone-pill.intensity {
+            background: rgba(173, 62, 41, 0.11);
+            color: #9c3f2a;
+            border-color: rgba(173, 62, 41, 0.18);
+        }
+
+        .segment-stats {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            font-size: 0.79rem;
+            color: #475b6c;
+            border: 1px solid rgba(39, 54, 69, 0.14);
+            background: rgba(255, 255, 255, 0.76);
+            border-radius: 999px;
+            padding: 4px 9px;
+            font-weight: 600;
+        }
+
+        .segment-audio {
+            border: 1px solid rgba(39, 54, 69, 0.1);
+            background: rgba(255, 255, 255, 0.58);
+            border-radius: 12px;
+            padding: 8px;
         }
 
         .segment p {
@@ -684,23 +816,21 @@
                     <div class="control-grid">
                         <div class="control">
                             <label for="persona">Persona Preset</label>
-                            <div id="personaWrap" class="select-wrap">
-                                <select id="persona" name="persona">
-                                    <option value="support" {{ "selected" if persona == "support" else "" }}>Support Agent</option>
-                                    <option value="sales" {{ "selected" if persona == "sales" else "" }}>Sales Rep</option>
-                                    <option value="executive" {{ "selected" if persona == "executive" else "" }}>Executive Briefing</option>
-                                </select>
+                            <input type="hidden" id="persona" name="persona" value="{{ persona }}">
+                            <div class="choice-group" role="radiogroup" aria-label="Persona Preset">
+                                <button type="button" class="choice-btn persona-choice persona-support" data-value="support">Support Agent</button>
+                                <button type="button" class="choice-btn persona-choice persona-sales" data-value="sales">Sales Rep</button>
+                                <button type="button" class="choice-btn persona-choice persona-executive" data-value="executive">Executive Briefing</button>
                             </div>
                         </div>
                         <div class="control">
                             <label for="intensity_mode">Intensity Mode</label>
-                            <div class="select-wrap">
-                                <select id="intensity_mode" name="intensity_mode">
-                                    <option value="auto" {{ "selected" if intensity_mode == "auto" else "" }}>Auto Detect</option>
-                                    <option value="mild" {{ "selected" if intensity_mode == "mild" else "" }}>Force Mild</option>
-                                    <option value="moderate" {{ "selected" if intensity_mode == "moderate" else "" }}>Force Moderate</option>
-                                    <option value="strong" {{ "selected" if intensity_mode == "strong" else "" }}>Force Strong</option>
-                                </select>
+                            <input type="hidden" id="intensity_mode" name="intensity_mode" value="{{ intensity_mode }}">
+                            <div class="choice-group" role="radiogroup" aria-label="Intensity Mode">
+                                <button type="button" class="choice-btn intensity-choice intensity-auto" data-value="auto">Auto</button>
+                                <button type="button" class="choice-btn intensity-choice intensity-mild" data-value="mild">Mild</button>
+                                <button type="button" class="choice-btn intensity-choice intensity-moderate" data-value="moderate">Moderate</button>
+                                <button type="button" class="choice-btn intensity-choice intensity-strong" data-value="strong">Strong</button>
                             </div>
                         </div>
                         <div class="control">
@@ -831,10 +961,22 @@
                     <div class="segment-list">
                         {% for segment in sentence_results %}
                         <article class="segment">
-                            <strong>Segment {{ segment.index }}: {{ segment.analysis.emotion }} / {{ segment.analysis.intensity }}</strong>
+                            <div class="segment-header">
+                                <span class="segment-id">Segment {{ segment.index }}</span>
+                                <div class="segment-tones">
+                                    <span class="tone-pill emotion">{{ segment.analysis.emotion }}</span>
+                                    <span class="tone-pill intensity">{{ segment.analysis.intensity }}</span>
+                                </div>
+                            </div>
                             <p>{{ segment.text }}</p>
-                            <p class="hint">rate {{ segment.voice_profile.rate }}, volume {{ segment.voice_profile.volume }}, pitch {{ segment.voice_profile.pitch_delta }}</p>
-                            <audio controls src="{{ segment.audio_url }}"></audio>
+                            <div class="segment-stats">
+                                <span class="stat-pill">rate {{ segment.voice_profile.rate }}</span>
+                                <span class="stat-pill">volume {{ segment.voice_profile.volume }}</span>
+                                <span class="stat-pill">pitch {{ segment.voice_profile.pitch_delta }}</span>
+                            </div>
+                            <div class="segment-audio">
+                                <audio controls src="{{ segment.audio_url }}"></audio>
+                            </div>
                         </article>
                         {% endfor %}
                     </div>
@@ -854,8 +996,10 @@
         const charCount = document.getElementById("charCount");
         const durationHint = document.getElementById("durationHint");
         const sampleButtons = document.querySelectorAll("[data-sample]");
-        const personaSelect = document.getElementById("persona");
-        const personaWrap = document.getElementById("personaWrap");
+        const personaInput = document.getElementById("persona");
+        const intensityInput = document.getElementById("intensity_mode");
+        const personaChoices = document.querySelectorAll(".persona-choice");
+        const intensityChoices = document.querySelectorAll(".intensity-choice");
 
         function updateTextMeta() {
             const value = textarea.value || "";
@@ -866,13 +1010,42 @@
             durationHint.textContent = "Estimated speech: " + seconds + "s";
         }
 
-        function updatePersonaAccent() {
-            if (!personaSelect || !personaWrap) {
+        function bindChoiceGroup(buttons, input) {
+            if (!input || buttons.length === 0) {
                 return;
             }
-            personaWrap.classList.remove("persona-support", "persona-sales", "persona-executive");
-            const value = personaSelect.value || "support";
-            personaWrap.classList.add("persona-" + value);
+
+            function refreshActive(value) {
+                buttons.forEach((button) => {
+                    button.classList.toggle("active", button.dataset.value === value);
+                });
+            }
+
+            refreshActive(input.value);
+
+            buttons.forEach((button) => {
+                button.addEventListener("click", () => {
+                    const value = button.dataset.value;
+                    if (!value) {
+                        return;
+                    }
+                    input.value = value;
+                    refreshActive(value);
+                });
+            });
+
+            buttons.forEach((button, index) => {
+                button.addEventListener("keydown", (event) => {
+                    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") {
+                        return;
+                    }
+                    event.preventDefault();
+                    const direction = event.key === "ArrowRight" ? 1 : -1;
+                    const nextIndex = (index + direction + buttons.length) % buttons.length;
+                    buttons[nextIndex].focus();
+                    buttons[nextIndex].click();
+                });
+            });
         }
 
         sampleButtons.forEach((button) => {
@@ -884,11 +1057,9 @@
         });
 
         textarea.addEventListener("input", updateTextMeta);
-        if (personaSelect) {
-            personaSelect.addEventListener("change", updatePersonaAccent);
-        }
+        bindChoiceGroup(personaChoices, personaInput);
+        bindChoiceGroup(intensityChoices, intensityInput);
         updateTextMeta();
-        updatePersonaAccent();
     </script>
 </body>
 </html>
