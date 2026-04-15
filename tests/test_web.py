@@ -10,15 +10,18 @@ import app.web as web_module
 
 
 class FakeEmotionService:
-    def analyze(self, text: str) -> EmotionAnalysis:
+    def analyze(self, text: str, intensity_override: str | None = None) -> EmotionAnalysis:
         return EmotionAnalysis(
             text=text,
             emotion="happy",
             sentiment_score=0.91,
-            intensity="strong",
+            intensity=intensity_override or "strong",
             confidence=0.94,
             cues=["positive_keywords:2"],
         )
+
+    def split_sentences(self, text: str, max_sentences: int = 6) -> list[str]:
+        return ["Thank you for the wonderful update!", "This means a lot."]
 
 
 class FakeVoiceMapper:
@@ -38,9 +41,11 @@ class FakeTTSService:
         self.output_dir = output_dir
         self.provider = "auto"
         self.settings = type("FakeSettings", (), {"elevenlabs_api_key": "test-key"})()
+        self.counter = 0
 
     def synthesize_to_file(self, text: str, voice_profile: VoiceProfile) -> SynthesisResult:
-        target = self.output_dir / "web-test.mp3"
+        self.counter += 1
+        target = self.output_dir / f"web-test-{self.counter}.mp3"
         target.write_bytes(b"fake-audio")
         return SynthesisResult(
             output_path=str(target),
@@ -77,12 +82,23 @@ class WebAppTests(unittest.TestCase):
         self.assertIn("The Empathy Engine", response.text)
 
     def test_generate_page_returns_audio_result(self) -> None:
-        response = self.client.post("/generate", data={"text": "Thank you for the wonderful update!"})
+        response = self.client.post(
+            "/generate",
+            data={
+                "text": "Thank you for the wonderful update! This means a lot.",
+                "compare_mode": "on",
+                "sentence_mode": "on",
+                "intensity_mode": "moderate",
+            },
+        )
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Audio generated with", response.text)
+        self.assertIn("Empathetic Output", response.text)
+        self.assertIn("Neutral Baseline", response.text)
+        self.assertIn("Sentence-level modulation", response.text)
+        self.assertIn("Download JSON", response.text)
         self.assertIn("happy", response.text)
-        self.assertIn("web-test.mp3", response.text)
+        self.assertIn("web-test-1.mp3", response.text)
 
     def test_generate_requires_non_empty_text(self) -> None:
         response = self.client.post("/generate", data={"text": "   "})

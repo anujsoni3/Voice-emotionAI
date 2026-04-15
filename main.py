@@ -30,6 +30,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Skip audio generation and only print the detected emotion and voice settings.",
     )
+    parser.add_argument(
+        "--intensity",
+        choices=["auto", "mild", "moderate", "strong"],
+        default="auto",
+        help="Force intensity level instead of auto detection.",
+    )
     return parser.parse_args()
 
 
@@ -49,7 +55,8 @@ def main() -> None:
     cli_provider = args.provider or "edge"
     tts_service = TTSService(provider=cli_provider)
 
-    analysis = emotion_service.analyze(text)
+    intensity_override = None if args.intensity == "auto" else args.intensity
+    analysis = emotion_service.analyze(text, intensity_override=intensity_override)
     voice_profile = voice_mapper.map_emotion(analysis)
 
     print("\nThe Empathy Engine analysis")

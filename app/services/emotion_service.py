@@ -96,7 +96,7 @@ class EmotionService:
     def __init__(self) -> None:
         self._analyzer = SentimentIntensityAnalyzer() if SentimentIntensityAnalyzer else None
 
-    def analyze(self, text: str) -> EmotionAnalysis:
+    def analyze(self, text: str, intensity_override: str | None = None) -> EmotionAnalysis:
         cleaned_text = text.strip()
         if not cleaned_text:
             raise ValueError("Text input cannot be empty.")
@@ -146,7 +146,7 @@ class EmotionService:
             question_marks=question_marks,
             exclamation_count=exclamation_count,
         )
-        intensity = self._intensity_for_score(adjusted_score, cleaned_text, positive_hits, negative_hits)
+        intensity = self._resolve_intensity(adjusted_score, cleaned_text, positive_hits, negative_hits, intensity_override)
         confidence = min(0.99, 0.45 + abs(adjusted_score) * 0.45 + min(0.1, 0.03 * (positive_hits + negative_hits)))
 
         return EmotionAnalysis(
@@ -160,6 +160,13 @@ class EmotionService:
 
     def analyze_as_dict(self, text: str) -> dict[str, object]:
         return asdict(self.analyze(text))
+
+    @staticmethod
+    def split_sentences(text: str, max_sentences: int = 6) -> list[str]:
+        chunks = [segment.strip() for segment in re.split(r"(?<=[.!?])\s+", text.strip()) if segment.strip()]
+        if not chunks:
+            return []
+        return chunks[:max_sentences]
 
     def _compound_score(self, text: str) -> float:
         if self._analyzer is not None:
@@ -220,3 +227,15 @@ class EmotionService:
         if signal >= 0.4:
             return "moderate"
         return "mild"
+
+    @staticmethod
+    def _resolve_intensity(
+        score: float,
+        text: str,
+        positive_hits: int,
+        negative_hits: int,
+        intensity_override: str | None,
+    ) -> str:
+        if intensity_override in {"mild", "moderate", "strong"}:
+            return intensity_override
+        return EmotionService._intensity_for_score(score, text, positive_hits, negative_hits)

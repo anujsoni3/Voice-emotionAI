@@ -127,6 +127,42 @@
             flex-wrap: wrap;
         }
 
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .control {
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(59, 74, 87, 0.12);
+            background: rgba(255, 255, 255, 0.7);
+            display: grid;
+            gap: 8px;
+        }
+
+        select {
+            width: 100%;
+            border: 1px solid rgba(59, 74, 87, 0.2);
+            border-radius: 10px;
+            padding: 8px 10px;
+            background: #fff;
+            font: inherit;
+            color: var(--text);
+        }
+
+        .switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: var(--text);
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 600;
+        }
+
         button {
             appearance: none;
             border: 0;
@@ -228,6 +264,41 @@
             color: var(--muted);
         }
 
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .audio-card {
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(59, 74, 87, 0.1);
+        }
+
+        .segment-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 10px;
+            max-height: 340px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .segment {
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(59, 74, 87, 0.12);
+        }
+
+        .segment p {
+            margin: 6px 0;
+            line-height: 1.5;
+        }
+
         @media (max-width: 860px) {
             .content {
                 grid-template-columns: 1fr;
@@ -240,6 +311,11 @@
             }
 
             .metric-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .control-grid,
+            .compare-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -263,6 +339,31 @@
                         <label for="text">Input Text</label>
                         <textarea id="text" name="text" placeholder="Paste a customer message, sales reply, or support update here...">{{ text }}</textarea>
                     </div>
+                    <div class="control-grid">
+                        <div class="control">
+                            <label for="intensity_mode" style="font-size:0.8rem;">Intensity Mode</label>
+                            <select id="intensity_mode" name="intensity_mode">
+                                <option value="auto" {{ "selected" if intensity_mode == "auto" else "" }}>Auto Detect</option>
+                                <option value="mild" {{ "selected" if intensity_mode == "mild" else "" }}>Force Mild</option>
+                                <option value="moderate" {{ "selected" if intensity_mode == "moderate" else "" }}>Force Moderate</option>
+                                <option value="strong" {{ "selected" if intensity_mode == "strong" else "" }}>Force Strong</option>
+                            </select>
+                        </div>
+                        <div class="control">
+                            <label class="switch" for="compare_mode">
+                                <input id="compare_mode" type="checkbox" name="compare_mode" {{ "checked" if compare_mode else "" }}>
+                                Compare neutral vs empathetic
+                            </label>
+                            <span class="hint">Generates a baseline neutral track for A/B listening.</span>
+                        </div>
+                        <div class="control">
+                            <label class="switch" for="sentence_mode">
+                                <input id="sentence_mode" type="checkbox" name="sentence_mode" {{ "checked" if sentence_mode else "" }}>
+                                Sentence-level modulation
+                            </label>
+                            <span class="hint">Creates per-sentence expressive clips for long input.</span>
+                        </div>
+                    </div>
                     <div class="actions">
                         <button type="submit">Generate Empathetic Voice</button>
                         <span class="hint">Supports auto provider selection, ElevenLabs, and edge-tts fallback.</span>
@@ -277,7 +378,18 @@
                 <div class="status success" style="margin-top: 18px;">
                     Audio generated with <strong>{{ synthesis.provider }}</strong> and saved as
                     <strong>{{ synthesis.file_name }}</strong>.
-                    <audio controls src="{{ audio_url }}"></audio>
+                    <div class="compare-grid">
+                        <div class="audio-card">
+                            <strong>Empathetic Output</strong>
+                            <audio controls src="{{ audio_url }}"></audio>
+                        </div>
+                        {% if neutral_synthesis %}
+                        <div class="audio-card">
+                            <strong>Neutral Baseline</strong>
+                            <audio controls src="{{ neutral_audio_url }}"></audio>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endif %}
 
@@ -329,12 +441,45 @@
 
                 <p class="style-note">{{ voice_profile.style_note }}</p>
 
+                {% if report_url %}
+                <div class="status" style="background: rgba(73, 132, 183, 0.08); color: #36556d; border: 1px solid rgba(73, 132, 183, 0.16);">
+                    Explainability report ready:
+                    <a href="{{ report_url }}" download style="color:#23445d; font-weight:700;">Download JSON</a>
+                </div>
+                {% endif %}
+
+                {% if neutral_profile and neutral_synthesis %}
+                <div>
+                    <span style="display:block; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted);">Compare mode parameters</span>
+                    <div class="chips">
+                        <span class="chip">Empathetic: rate {{ voice_profile.rate }}, volume {{ voice_profile.volume }}, pitch {{ voice_profile.pitch_delta }}</span>
+                        <span class="chip">Neutral: rate {{ neutral_profile.rate }}, volume {{ neutral_profile.volume }}, pitch {{ neutral_profile.pitch_delta }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if analysis.cues %}
                 <div>
                     <span style="display:block; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted);">Detected cues</span>
                     <div class="chips">
                         {% for cue in analysis.cues %}
                         <span class="chip">{{ cue }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if sentence_results %}
+                <div>
+                    <span style="display:block; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted);">Sentence-level modulation</span>
+                    <div class="segment-list">
+                        {% for segment in sentence_results %}
+                        <article class="segment">
+                            <strong>Segment {{ segment.index }}: {{ segment.analysis.emotion }} / {{ segment.analysis.intensity }}</strong>
+                            <p>{{ segment.text }}</p>
+                            <p class="hint">rate {{ segment.voice_profile.rate }}, volume {{ segment.voice_profile.volume }}, pitch {{ segment.voice_profile.pitch_delta }}</p>
+                            <audio controls src="{{ segment.audio_url }}"></audio>
+                        </article>
                         {% endfor %}
                     </div>
                 </div>

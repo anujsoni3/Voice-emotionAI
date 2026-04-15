@@ -39,6 +39,19 @@ class EmotionServiceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.service.analyze("   ")
 
+    def test_intensity_override_forces_output_level(self) -> None:
+        analysis = self.service.analyze(
+            "This is fine and informational.",
+            intensity_override="strong",
+        )
+        self.assertEqual(analysis.intensity, "strong")
+
+    def test_split_sentences_limits_segments(self) -> None:
+        text = "One. Two! Three? Four. Five. Six. Seven."
+        segments = self.service.split_sentences(text, max_sentences=4)
+        self.assertEqual(len(segments), 4)
+        self.assertEqual(segments[0], "One.")
+
 
 if __name__ == "__main__":
     unittest.main()
