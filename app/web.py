@@ -5,7 +5,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -77,6 +77,16 @@ async def home(request: Request) -> HTMLResponse:
             "error": None,
         },
     )
+
+
+@app.get("/healthz", response_class=JSONResponse)
+async def healthz() -> JSONResponse:
+    return JSONResponse({"status": "ok"})
+
+
+@app.head("/healthz")
+async def healthz_head() -> JSONResponse:
+    return JSONResponse({"status": "ok"})
 
 
 @app.post("/generate", response_class=HTMLResponse)

@@ -81,6 +81,14 @@ class WebAppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("The Empathy Engine", response.text)
 
+    def test_healthz_get_and_head(self) -> None:
+        get_response = self.client.get("/healthz")
+        head_response = self.client.head("/healthz")
+
+        self.assertEqual(get_response.status_code, 200)
+        self.assertEqual(get_response.json(), {"status": "ok"})
+        self.assertEqual(head_response.status_code, 200)
+
     def test_generate_page_returns_audio_result(self) -> None:
         response = self.client.post(
             "/generate",
