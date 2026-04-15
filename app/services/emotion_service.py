@@ -28,6 +28,16 @@ POSITIVE_CUES = {
     "best",
 }
 
+SURPRISED_CUES = {
+    "wow",
+    "unbelievable",
+    "incredible",
+    "unexpected",
+    "surprised",
+    "shocked",
+    "amazed",
+}
+
 NEGATIVE_CUES = {
     "bad",
     "terrible",
@@ -45,6 +55,18 @@ NEGATIVE_CUES = {
     "complaint",
 }
 
+CONCERNED_CUES = {
+    "concerned",
+    "worried",
+    "urgent",
+    "risk",
+    "immediately",
+    "asap",
+    "critical",
+    "please",
+    "help",
+}
+
 NEUTRAL_CUES = {
     "update",
     "schedule",
@@ -52,6 +74,19 @@ NEUTRAL_CUES = {
     "noted",
     "information",
     "details",
+}
+
+INQUISITIVE_CUES = {
+    "can",
+    "could",
+    "would",
+    "when",
+    "where",
+    "why",
+    "how",
+    "what",
+    "clarify",
+    "explain",
 }
 
 
@@ -71,6 +106,11 @@ class EmotionService:
         positive_hits = self._count_hits(cleaned_text, POSITIVE_CUES)
         negative_hits = self._count_hits(cleaned_text, NEGATIVE_CUES)
         neutral_hits = self._count_hits(cleaned_text, NEUTRAL_CUES)
+        surprised_hits = self._count_hits(cleaned_text, SURPRISED_CUES)
+        concerned_hits = self._count_hits(cleaned_text, CONCERNED_CUES)
+        inquisitive_hits = self._count_hits(cleaned_text, INQUISITIVE_CUES)
+        question_marks = cleaned_text.count("?")
+        exclamation_count = cleaned_text.count("!")
 
         adjusted_score = compound
         cues: list[str] = []
@@ -87,9 +127,25 @@ class EmotionService:
         if neutral_hits and not positive_hits and not negative_hits:
             adjusted_score *= 0.75
             cues.append(f"neutral_keywords:{neutral_hits}")
+        if surprised_hits:
+            cues.append(f"surprised_keywords:{surprised_hits}")
+        if concerned_hits:
+            cues.append(f"concerned_keywords:{concerned_hits}")
+        if inquisitive_hits:
+            cues.append(f"inquisitive_keywords:{inquisitive_hits}")
+        if question_marks:
+            cues.append(f"questions:{question_marks}")
 
         adjusted_score = max(-1.0, min(1.0, adjusted_score))
-        emotion = self._label_for_score(adjusted_score)
+        emotion = self._label_for_signal(
+            adjusted_score,
+            surprised_hits=surprised_hits,
+            concerned_hits=concerned_hits,
+            inquisitive_hits=inquisitive_hits,
+            negative_hits=negative_hits,
+            question_marks=question_marks,
+            exclamation_count=exclamation_count,
+        )
         intensity = self._intensity_for_score(adjusted_score, cleaned_text, positive_hits, negative_hits)
         confidence = min(0.99, 0.45 + abs(adjusted_score) * 0.45 + min(0.1, 0.03 * (positive_hits + negative_hits)))
 
@@ -127,7 +183,29 @@ class EmotionService:
         return 1.0 + min(0.35, exclamation_count * 0.07 + uppercase_words * 0.08)
 
     @staticmethod
-    def _label_for_score(score: float) -> str:
+    def _label_for_signal(
+        score: float,
+        surprised_hits: int,
+        concerned_hits: int,
+        inquisitive_hits: int,
+        negative_hits: int,
+        question_marks: int,
+        exclamation_count: int,
+    ) -> str:
+        if surprised_hits and score >= 0.2:
+            return "surprised"
+        if surprised_hits and exclamation_count >= 2 and score >= 0.45:
+            return "surprised"
+        if concerned_hits >= 3:
+            return "concerned"
+        if concerned_hits >= 2 and negative_hits:
+            return "concerned"
+        if concerned_hits >= 2 and score <= 0.35:
+            return "concerned"
+        if concerned_hits and score <= -0.15:
+            return "concerned"
+        if question_marks and (inquisitive_hits or abs(score) < 0.35):
+            return "inquisitive"
         if score >= 0.25:
             return "happy"
         if score <= -0.25:

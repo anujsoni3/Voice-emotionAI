@@ -12,11 +12,29 @@ BASE_PROFILES = {
         "pitch_delta": 4,
         "style_note": "Deliver with warmth, uplift, and positive momentum.",
     },
+    "surprised": {
+        "rate": 190,
+        "volume": 0.96,
+        "pitch_delta": 5,
+        "style_note": "Deliver with energetic emphasis and crisp excitement.",
+    },
     "neutral": {
         "rate": 175,
         "volume": 0.85,
         "pitch_delta": 0,
         "style_note": "Deliver clearly, steadily, and without strong affect.",
+    },
+    "inquisitive": {
+        "rate": 172,
+        "volume": 0.86,
+        "pitch_delta": 2,
+        "style_note": "Deliver with curious clarity and a lightly rising intonation.",
+    },
+    "concerned": {
+        "rate": 162,
+        "volume": 0.9,
+        "pitch_delta": -2,
+        "style_note": "Deliver with care, reassurance, and attentive urgency.",
     },
     "frustrated": {
         "rate": 155,
@@ -40,14 +58,18 @@ class VoiceMapper:
         base = BASE_PROFILES[analysis.emotion]
         adjustment = INTENSITY_ADJUSTMENTS[analysis.intensity]
 
-        if analysis.emotion == "frustrated":
+        if analysis.emotion in {"frustrated", "concerned"}:
             rate = base["rate"] - adjustment["rate"]
             volume = min(1.0, base["volume"] + adjustment["volume"])
             pitch_delta = base["pitch_delta"] - adjustment["pitch_delta"]
-        elif analysis.emotion == "happy":
+        elif analysis.emotion in {"happy", "surprised"}:
             rate = base["rate"] + adjustment["rate"]
             volume = min(1.0, base["volume"] + adjustment["volume"])
             pitch_delta = base["pitch_delta"] + adjustment["pitch_delta"]
+        elif analysis.emotion == "inquisitive":
+            rate = base["rate"] + max(2, adjustment["rate"] // 3)
+            volume = min(1.0, base["volume"] + adjustment["volume"] / 2)
+            pitch_delta = base["pitch_delta"] + max(1, adjustment["pitch_delta"])
         else:
             rate = base["rate"]
             volume = min(1.0, base["volume"] + adjustment["volume"] / 2)

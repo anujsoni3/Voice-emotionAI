@@ -7,13 +7,14 @@ This project was built for the assignment "The Empathy Engine: Giving AI a Human
 ## Assignment Coverage
 This project satisfies the core requirements:
 - `Text Input`: supported through both CLI and FastAPI web form
-- `Emotion Detection`: classifies text into `happy`, `frustrated`, and `neutral`
+- `Emotion Detection`: classifies text into `happy`, `frustrated`, and `neutral` (plus nuanced bonus classes)
 - `Vocal Parameter Modulation`: modulates `rate`, `volume`, and `pitch`
 - `Emotion-to-Voice Mapping`: implemented with explicit mapping logic in the service layer
 - `Audio Output`: generates playable `.mp3` or `.wav` files depending on provider
 
 Bonus features included:
 - `Intensity Scaling`: mild, moderate, and strong intensity levels affect voice modulation
+- `Granular Emotions`: supports `surprised`, `concerned`, and `inquisitive` in addition to core classes
 - `Web Interface`: browser UI with text area, result summary, and embedded audio playback
 - `Provider Flexibility`: supports `edge-tts`, `pyttsx3`, and optional `ElevenLabs`
 
@@ -51,6 +52,11 @@ It returns:
 - confidence score
 - detected cues
 
+Nuanced labels supported for richer demos:
+- `surprised` for excited positive spikes
+- `concerned` for urgent negative-with-care language
+- `inquisitive` for question-driven, clarification-seeking text
+
 ### 2. Emotion-to-Voice Mapping
 The `VoiceMapper` converts emotion into speech parameters.
 
@@ -58,6 +64,9 @@ Base mapping:
 - `happy`: faster, slightly louder, higher pitch
 - `neutral`: balanced rate and volume
 - `frustrated`: slower, grounded delivery, lower pitch
+- `surprised`: energetic pace and higher pitch arc
+- `concerned`: slower, reassuring delivery with lower pitch
+- `inquisitive`: clear, curious delivery with slight upward pitch
 
 Intensity scaling:
 - `mild`: minimal modulation

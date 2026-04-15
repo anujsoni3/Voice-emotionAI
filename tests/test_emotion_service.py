@@ -23,6 +23,18 @@ class EmotionServiceTests(unittest.TestCase):
         analysis = self.service.analyze("Please confirm the meeting schedule for tomorrow afternoon.")
         self.assertEqual(analysis.emotion, "neutral")
 
+    def test_detects_surprised_text(self) -> None:
+        analysis = self.service.analyze("Wow, this is incredible news! I am amazed!")
+        self.assertEqual(analysis.emotion, "surprised")
+
+    def test_detects_concerned_text(self) -> None:
+        analysis = self.service.analyze("I am concerned about this urgent issue, please help immediately.")
+        self.assertEqual(analysis.emotion, "concerned")
+
+    def test_detects_inquisitive_text(self) -> None:
+        analysis = self.service.analyze("Could you clarify why the schedule changed?")
+        self.assertEqual(analysis.emotion, "inquisitive")
+
     def test_rejects_empty_text(self) -> None:
         with self.assertRaises(ValueError):
             self.service.analyze("   ")

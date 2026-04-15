@@ -46,7 +46,8 @@ def main() -> None:
 
     emotion_service = EmotionService()
     voice_mapper = VoiceMapper()
-    tts_service = TTSService(provider=args.provider)
+    cli_provider = args.provider or "edge"
+    tts_service = TTSService(provider=cli_provider)
 
     analysis = emotion_service.analyze(text)
     voice_profile = voice_mapper.map_emotion(analysis)
@@ -69,6 +70,7 @@ def main() -> None:
         print("\nPreview mode enabled. Audio generation skipped.")
         return
 
+    print(f"\nGenerating audio with provider: {cli_provider}")
     synthesis = tts_service.synthesize_to_file(analysis.text, voice_profile)
     print(f"\nAudio file generated: {synthesis.output_path}")
     print(f"TTS provider: {synthesis.provider}")
