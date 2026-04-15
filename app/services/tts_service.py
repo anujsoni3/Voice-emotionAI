@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import asyncio
 import re
+from concurrent.futures import Future
 from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 from sys import platform
-from typing import Callable
+from threading import Thread
+from typing import Any, Awaitable, Callable, Protocol, cast
 
 import requests
 
@@ -24,6 +26,16 @@ except ImportError:  # pragma: no cover - handled by runtime validation
     pyttsx3 = None
 
 
+class Pyttsx3Engine(Protocol):
+    def setProperty(self, name: str, value: str | float | int) -> None: ...
+
+    def save_to_file(self, text: str, filename: str) -> None: ...
+
+    def runAndWait(self) -> None: ...
+
+    def stop(self) -> None: ...
+
+
 class TTSService:
     """Synthesizes audio using a local TTS backend."""
 
@@ -33,7 +45,7 @@ class TTSService:
         self,
         output_dir: str | Path = "outputs",
         provider: str | None = None,
-        engine_factory: Callable[[], object] | None = None,
+        engine_factory: Callable[[], Pyttsx3Engine] | None = None,
         settings: Settings | None = None,
         http_session: requests.sessions.Session | None = None,
     ) -> None:
@@ -85,12 +97,12 @@ class TTSService:
         extension = ".mp3" if resolved_provider in {"edge", "elevenlabs"} else ".wav"
         return self.output_dir / f"{timestamp}_{slug}{extension}"
 
-    def _default_engine_factory(self) -> object:
+    def _default_engine_factory(self) -> Pyttsx3Engine:
         if pyttsx3 is None:
             raise RuntimeError(
                 "pyttsx3 is not installed. Install dependencies with `python -m pip install -r requirements.txt`."
             )
-        return pyttsx3.init()
+        return cast(Pyttsx3Engine, pyttsx3.init())
 
     def _resolve_provider(self) -> str:
         if self.provider != "auto":
@@ -130,7 +142,7 @@ class TTSService:
         )
 
         try:
-            asyncio.run(communicate.save(str(output_path)))
+            self._run_async_task(communicate.save(str(output_path)))
         except Exception as exc:  # pragma: no cover - depends on runtime/network
             raise RuntimeError(
                 "Edge TTS synthesis failed. Check your internet connection or switch to the preview mode."
@@ -214,6 +226,29 @@ class TTSService:
         snippet = " ".join(text.lower().split()[:6])
         slug = re.sub(r"[^a-z0-9]+", "-", snippet).strip("-")
         return slug or "speech"
+
+    @staticmethod
+    def _run_async_task(coro: Awaitable[object]) -> None:
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            asyncio.run(coro)
+            return
+
+        result: Future[None] = Future()
+
+        def runner() -> None:
+            try:
+                asyncio.run(coro)
+            except Exception as exc:  # pragma: no cover - depends on runtime/network
+                result.set_exception(exc)
+            else:
+                result.set_result(None)
+
+        thread = Thread(target=runner, daemon=True)
+        thread.start()
+        thread.join()
+        result.result()
 
     @staticmethod
     def as_dict(result: SynthesisResult) -> dict[str, object]:
