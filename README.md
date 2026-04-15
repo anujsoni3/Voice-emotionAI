@@ -16,6 +16,9 @@ Bonus features included:
 - `Intensity Scaling`: mild, moderate, and strong intensity levels affect voice modulation
 - `Granular Emotions`: supports `surprised`, `concerned`, and `inquisitive` in addition to core classes
 - `Web Interface`: browser UI with text area, result summary, and embedded audio playback
+- `A/B Compare Mode`: generates neutral baseline and empathetic output for side-by-side listening
+- `Sentence-Level Modulation`: generates per-sentence expressive clips for long inputs
+- `Explainability Export`: writes a downloadable JSON report with cues, mappings, and provider metadata
 - `Provider Flexibility`: supports `edge-tts`, `pyttsx3`, and optional `ElevenLabs`
 
 ## Project Structure
@@ -129,6 +132,12 @@ Preview emotion analysis without generating audio:
 
 ```bash
 python main.py --preview-only "Please confirm the meeting schedule for tomorrow."
+
+Force an intensity level manually:
+
+```bash
+python main.py --preview-only --intensity strong "Please confirm the meeting schedule for tomorrow."
+```
 ```
 
 Force a specific TTS provider:
@@ -149,6 +158,17 @@ Then open:
 
 ```text
 http://127.0.0.1:8000
+
+Web controls include:
+- `Intensity Mode`: auto, mild, moderate, strong
+- `Compare neutral vs empathetic`: generates A/B audio players
+- `Sentence-level modulation`: generates clip-by-clip expressive output
+
+Each generation also exports a report JSON file in `outputs/` with:
+- top-level analysis and cues
+- mapped voice parameters
+- provider and pitch application metadata
+- optional sentence segment breakdown
 ```
 
 ## Deployment Notes
