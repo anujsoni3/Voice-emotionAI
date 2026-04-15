@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from app.services.emotion_service import EmotionService
 from app.services.tts_service import TTSService
 from app.services.voice_mapper import VoiceMapper
-from app.models import EmotionAnalysis
+from app.models import EmotionAnalysis, VoiceProfile
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,6 +33,18 @@ templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "tem
 emotion_service = EmotionService()
 voice_mapper = VoiceMapper()
 tts_service = TTSService(output_dir=OUTPUTS_DIR)
+
+
+def _flatten_neutral_baseline(profile: VoiceProfile) -> VoiceProfile:
+    """Make neutral baseline intentionally flatter for clearer A/B comparison."""
+    return VoiceProfile(
+        emotion=profile.emotion,
+        intensity=profile.intensity,
+        rate=max(145, min(180, profile.rate - 18)),
+        volume=round(max(0.72, min(0.88, profile.volume - 0.08)), 2),
+        pitch_delta=0,
+        style_note=f"{profile.style_note} Neutral baseline: flattened cadence and affect for A/B clarity.",
+    )
 
 
 def _resolve_tts_service() -> TTSService:
@@ -120,6 +132,7 @@ async def generate(
             cues=["baseline_neutral"],
         )
         neutral_profile = voice_mapper.map_emotion(neutral_analysis, persona=selected_persona)
+        neutral_profile = _flatten_neutral_baseline(neutral_profile)
         neutral_synthesis = (
             current_tts_service.synthesize_to_file(cleaned_text, neutral_profile, persona=selected_persona)
             if compare_mode
