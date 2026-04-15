@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 
 import uvicorn
 
@@ -35,7 +36,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     if args.web:
-        uvicorn.run("app.web:app", host="127.0.0.1", port=8000, reload=False)
+        port = int(os.getenv("PORT", "8000"))
+        uvicorn.run("app.web:app", host="0.0.0.0", port=port, reload=False)
         return
 
     text = " ".join(args.text).strip()

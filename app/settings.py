@@ -3,6 +3,11 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+try:
+    from dotenv import load_dotenv
+except ImportError:  # pragma: no cover - optional in some environments
+    load_dotenv = None
+
 
 @dataclass(slots=True)
 class Settings:
@@ -13,6 +18,9 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> "Settings":
+        if load_dotenv is not None:
+            load_dotenv()
+
         return cls(
             tts_provider=os.getenv("EMPATHY_TTS_PROVIDER", "auto").strip().lower() or "auto",
             elevenlabs_api_key=os.getenv("ELEVENLABS_API_KEY"),
