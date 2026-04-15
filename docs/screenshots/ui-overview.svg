@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Empathy Engine UI Overview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7efe4"/>
+      <stop offset="50%" stop-color="#dce9e1"/>
+      <stop offset="100%" stop-color="#dce5f8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect x="40" y="30" width="1200" height="110" rx="24" fill="#fff9f2" stroke="#d8d8d8"/>
+  <text x="70" y="80" font-size="44" font-family="Georgia, serif" fill="#213243">The Empathy Engine</text>
+  <text x="70" y="108" font-size="20" font-family="Segoe UI, sans-serif" fill="#526575">Emotion-aware voice synthesis with compare mode and sentence modulation.</text>
+
+  <rect x="40" y="160" width="740" height="520" rx="22" fill="#fffdfa" stroke="#d4d4d4"/>
+  <text x="70" y="200" font-size="20" font-family="Segoe UI, sans-serif" fill="#415363">Input Text</text>
+  <rect x="70" y="220" width="680" height="190" rx="14" fill="#ffffff" stroke="#c9c9c9"/>
+  <text x="90" y="260" font-size="24" font-family="Segoe UI, sans-serif" fill="#2d3f50">Thanks for your patience. Your issue is now fixed...</text>
+
+  <rect x="70" y="430" width="680" height="110" rx="14" fill="#ffffff" stroke="#c9c9c9"/>
+  <text x="90" y="470" font-size="18" font-family="Segoe UI, sans-serif" fill="#405465">Persona chips, intensity chips, compare + sentence controls</text>
+
+  <rect x="70" y="560" width="340" height="52" rx="26" fill="#cf5d2b"/>
+  <text x="106" y="593" font-size="24" font-family="Segoe UI, sans-serif" font-weight="700" fill="#ffffff">Generate Empathetic Voice</text>
+
+  <rect x="800" y="160" width="440" height="520" rx="22" fill="#fffdfa" stroke="#d4d4d4"/>
+  <text x="830" y="200" font-size="34" font-family="Georgia, serif" fill="#223345">Analysis Output</text>
+  <rect x="830" y="225" width="380" height="250" rx="14" fill="#ffffff" stroke="#c9c9c9"/>
+  <text x="850" y="260" font-size="18" font-family="Segoe UI, sans-serif" fill="#334859">Emotion, intensity, confidence, rate, pitch, volume</text>
+  <rect x="830" y="495" width="380" height="70" rx="12" fill="#f9e0d2" stroke="#e8bda6"/>
+  <text x="850" y="537" font-size="18" font-family="Segoe UI, sans-serif" fill="#7a3a1f">Style note and explainability summary</text>
+
+  <text x="40" y="705" font-size="14" font-family="Segoe UI, sans-serif" fill="#6a7a86">Illustrative mock screenshot for documentation</text>
+</svg>

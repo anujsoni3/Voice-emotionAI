@@ -1,118 +1,181 @@
 # The Empathy Engine
 
-The Empathy Engine is a Python-based voice AI demo that analyzes the emotional tone of text and generates speech with adjusted vocal delivery. Instead of reading every line in a flat robotic voice, it detects whether a message feels happy, frustrated, or neutral, then changes the speech rate, pitch, and volume profile to better match that emotional context.
+The Empathy Engine is an emotion-aware speech generation system that converts plain text into expressive audio. It detects emotional intent, maps that intent into voice parameters (rate, volume, pitch), and synthesizes playback-ready audio with explainability artifacts.
 
-This project was built for the assignment "The Empathy Engine: Giving AI a Human Voice" and is designed to satisfy the required features while also adding bonus polish through intensity scaling, a web interface, and optional premium voice generation through ElevenLabs.
+This project was built for the problem statement: **"The Empathy Engine: Giving AI a Human Voice."**
 
-## Assignment Coverage
-This project satisfies the core requirements:
-- `Text Input`: supported through both CLI and FastAPI web form
-- `Emotion Detection`: classifies text into `happy`, `frustrated`, and `neutral` (plus nuanced bonus classes)
-- `Vocal Parameter Modulation`: modulates `rate`, `volume`, and `pitch`
-- `Emotion-to-Voice Mapping`: implemented with explicit mapping logic in the service layer
-- `Audio Output`: generates playable `.mp3` or `.wav` files depending on provider
+## Table Of Contents
+- [Why This Project](#why-this-project)
+- [Feature Set](#feature-set)
+- [Screenshots](#screenshots)
+- [System Flowcharts](#system-flowcharts)
+- [Repository Structure](#repository-structure)
+- [Technology Stack](#technology-stack)
+- [Quick Start](#quick-start)
+- [Environment Configuration](#environment-configuration)
+- [Usage Guide](#usage-guide)
+- [Output Artifacts](#output-artifacts)
+- [Deployment Guide Render](#deployment-guide-render)
+- [Testing](#testing)
+- [Architecture Notes](#architecture-notes)
+- [Troubleshooting](#troubleshooting)
+- [Security Notes](#security-notes)
+- [Roadmap](#roadmap)
 
-Bonus features included:
-- `Intensity Scaling`: mild, moderate, and strong intensity levels affect voice modulation
-- `Granular Emotions`: supports `surprised`, `concerned`, and `inquisitive` in addition to core classes
-- `Web Interface`: browser UI with text area, result summary, and embedded audio playback
-- `A/B Compare Mode`: generates neutral baseline and empathetic output for side-by-side listening
-- `Sentence-Level Modulation`: generates per-sentence expressive clips for long inputs
-- `Explainability Export`: writes a downloadable JSON report with cues, mappings, and provider metadata
-- `Persona Presets`: supports `support`, `sales`, and `executive` speaking styles
-- `Prosody Enhancer`: applies clause pauses and phrasing refinement before synthesis
-- `Provider Flexibility`: supports `edge-tts`, `pyttsx3`, and optional `ElevenLabs`
+## Why This Project
+Most default TTS systems sound flat in customer-facing scenarios. This project closes that gap by combining sentiment analysis, rule-based emotional cues, persona presets, and dynamic voice modulation.
 
-## Project Structure
-```text
-app/
-  services/
-    emotion_service.py
-    tts_service.py
-    voice_mapper.py
-  templates/
-    index.html
-  models.py
-  settings.py
-  web.py
-main.py
-requirements.txt
-PLAN.md
+Result: the same text can sound empathetic, neutral, energetic, or calm depending on context.
+
+## Feature Set
+### Core Requirements Covered
+- Text input via CLI and web UI.
+- Emotion detection with 3+ classes.
+- Programmatic modulation of multiple voice parameters.
+- Explicit emotion-to-voice mapping logic.
+- Playable audio file generation (`.mp3` or `.wav`).
+
+### Advanced Features
+- Granular emotion labels: `happy`, `neutral`, `frustrated`, `surprised`, `concerned`, `inquisitive`.
+- Intensity scaling: `mild`, `moderate`, `strong`, plus manual override.
+- Persona presets: `support`, `sales`, `executive`.
+- Compare mode: empathetic output vs neutral baseline.
+- Sentence-level modulation: per-sentence analysis and synthesis.
+- Prosody enhancer: punctuation and phrasing adjustments for natural rhythm.
+- Explainability report export (`.json`) with cues and mapping metadata.
+- Multi-provider fallback: `elevenlabs` -> `edge-tts` -> `pyttsx3`.
+- Improved UX: responsive controls, loading overlay, keyboard-friendly selectors.
+
+## Screenshots
+> The following documentation visuals are included in this repository under `docs/screenshots/`.
+
+### 1. Main Web Interface
+![Empathy Engine UI](docs/screenshots/ui-overview.svg)
+
+### 2. A/B Compare Mode
+![Compare Mode](docs/screenshots/compare-mode.svg)
+
+### 3. Sentence-Level Modulation View
+![Sentence Modulation](docs/screenshots/sentence-modulation.svg)
+
+## System Flowcharts
+### End-To-End Request Flow
+```mermaid
+flowchart TD
+    A[User Input CLI or Web] --> B[EmotionService Analyze Text]
+    B --> C[Emotion + Intensity + Cues]
+    C --> D[VoiceMapper Build VoiceProfile]
+    D --> E[TTSService Synthesize Audio]
+    E --> F{Provider}
+    F -->|ElevenLabs OK| G[MP3 Output]
+    F -->|Fail| H[Edge-TTS Fallback]
+    H --> I[MP3 Output]
+    F -->|Offline fallback| J[pyttsx3 WAV Output]
+    G --> K[Web Audio Player + JSON Report]
+    I --> K
+    J --> K
 ```
 
-## How It Works
-### 1. Emotion Detection
-The `EmotionService` uses VADER sentiment analysis plus simple rule-based cues to classify input text.
+### Sentence-Level Modulation Flow
+```mermaid
+flowchart LR
+    A[Long Input Text] --> B[Split Into Sentences]
+    B --> C1[Analyze Segment 1]
+    B --> C2[Analyze Segment 2]
+    B --> C3[Analyze Segment N]
+    C1 --> D1[Map + Synthesize]
+    C2 --> D2[Map + Synthesize]
+    C3 --> D3[Map + Synthesize]
+    D1 --> E[Segment Cards + Players]
+    D2 --> E
+    D3 --> E
+```
 
-It looks at:
-- sentiment polarity score
-- positive keywords like `thanks`, `great`, `best`
-- negative keywords like `issue`, `delay`, `awful`
-- emphasis signals like exclamation marks and all-caps words
+### Provider Selection Strategy
+```mermaid
+flowchart TD
+    A[Configured Provider] --> B{auto?}
+    B -->|No| C[Use Explicit Provider]
+    B -->|Yes| D{ElevenLabs key available?}
+    D -->|Yes| E[Try ElevenLabs]
+    D -->|No| F[Try Edge-TTS]
+    E -->|Success| G[Return Audio]
+    E -->|Fail| F
+    F -->|Success| G
+    F -->|Fail| H[Fallback pyttsx3]
+    H --> G
+```
 
-It returns:
-- detected emotion
-- sentiment score
-- intensity level
-- confidence score
-- detected cues
+## Repository Structure
+```text
+.
+├── app/
+│   ├── services/
+│   │   ├── emotion_service.py
+│   │   ├── tts_service.py
+│   │   └── voice_mapper.py
+│   ├── static/
+│   ├── templates/
+│   │   └── index.html
+│   ├── models.py
+│   ├── settings.py
+│   └── web.py
+├── docs/
+│   └── screenshots/
+│       ├── ui-overview.svg
+│       ├── compare-mode.svg
+│       └── sentence-modulation.svg
+├── outputs/
+├── tests/
+├── main.py
+├── requirements.txt
+├── render.yaml
+└── README.md
+```
 
-Nuanced labels supported for richer demos:
-- `surprised` for excited positive spikes
-- `concerned` for urgent negative-with-care language
-- `inquisitive` for question-driven, clarification-seeking text
+## Technology Stack
+- **Language:** Python 3.11+
+- **Web Framework:** FastAPI + Jinja2
+- **Emotion Analysis:** VADER sentiment + rule-based cues
+- **TTS Providers:** ElevenLabs API, edge-tts, pyttsx3
+- **Server:** Uvicorn
+- **Testing:** unittest
 
-### 2. Emotion-to-Voice Mapping
-The `VoiceMapper` converts emotion into speech parameters.
-
-Base mapping:
-- `happy`: faster, slightly louder, higher pitch
-- `neutral`: balanced rate and volume
-- `frustrated`: slower, grounded delivery, lower pitch
-- `surprised`: energetic pace and higher pitch arc
-- `concerned`: slower, reassuring delivery with lower pitch
-- `inquisitive`: clear, curious delivery with slight upward pitch
-
-Intensity scaling:
-- `mild`: minimal modulation
-- `moderate`: noticeable modulation
-- `strong`: more dramatic modulation
-
-### 3. Audio Generation
-The `TTSService` generates the final audio file.
-
-Supported providers:
-- `auto`: prefers ElevenLabs if API key exists, otherwise falls back
-- `elevenlabs`: best human-like voice quality
-- `edge`: strong free prototype option with pitch/rate/volume support
-- `pyttsx3`: offline fallback
-
-## Setup
-### 1. Clone the repository
+## Quick Start
+### 1. Clone And Enter Project
 ```bash
 git clone https://github.com/anujsoni3/Voice-emotionAI.git
 cd Voice-emotionAI
 ```
 
-### 2. Create and activate a virtual environment
+### 2. Create Virtual Environment
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### 3. Install dependencies
+### 3. Install Dependencies
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### 4. Configure environment variables
-Copy `.env.example` to `.env` and fill values if you want ElevenLabs:
-
+### 4. Configure Environment
 ```bash
 copy .env.example .env
 ```
 
+Then edit `.env` as needed.
+
+### 5. Run Web App
+```bash
+python main.py --web
+```
+
+Open: `http://127.0.0.1:8000`
+
+## Environment Configuration
 Example `.env`:
+
 ```env
 EMPATHY_TTS_PROVIDER=auto
 ELEVENLABS_API_KEY=your_api_key_here
@@ -120,116 +183,137 @@ ELEVENLABS_VOICE_ID=EXAVITQu4vr4xnSDxMaL
 ELEVENLABS_MODEL_ID=eleven_multilingual_v2
 ```
 
-If no ElevenLabs key is provided, the app can still use `edge-tts`.
+Provider options for `EMPATHY_TTS_PROVIDER`:
+- `auto`
+- `elevenlabs`
+- `edge`
+- `pyttsx3`
 
-## Running The Project
-### CLI mode
-Generate audio from a text string:
-
+## Usage Guide
+### CLI Commands
+Generate audio:
 ```bash
 python main.py "This is the best news ever! Thank you so much!"
 ```
 
-Preview emotion analysis without generating audio:
-
+Preview only (no audio synthesis):
 ```bash
 python main.py --preview-only "Please confirm the meeting schedule for tomorrow."
+```
 
-Force an intensity level manually:
-
+Force intensity:
 ```bash
 python main.py --preview-only --intensity strong "Please confirm the meeting schedule for tomorrow."
 ```
 
-Select a persona preset:
-
+Select persona:
 ```bash
 python main.py --preview-only --persona executive "Please confirm the meeting schedule for tomorrow."
 ```
-```
 
-Force a specific TTS provider:
-
+Force provider:
 ```bash
 python main.py --provider edge "Thanks for your patience."
-python main.py --provider elevenlabs "We are thrilled to share this update with you!"
 ```
 
-### Web mode
-Run the FastAPI web interface:
+### Web Controls
+- Persona Preset (`support`, `sales`, `executive`)
+- Intensity Mode (`auto`, `mild`, `moderate`, `strong`)
+- Compare neutral vs empathetic
+- Sentence-level modulation
 
-```bash
-python main.py --web
-```
+## Output Artifacts
+The application writes generated files into `outputs/`:
+- Main audio output
+- Optional neutral baseline audio
+- Optional sentence-level audio files
+- Explainability report JSON
 
-Then open:
+Sample JSON report includes:
+- input text
+- selected options
+- overall analysis
+- mapped voice profile
+- provider metadata
+- segment breakdown (if enabled)
 
-```text
-http://127.0.0.1:8000
+## Deployment Guide Render
+`render.yaml` is already included.
 
-Web controls include:
-- `Persona Preset`: support, sales, executive
-- `Intensity Mode`: auto, mild, moderate, strong
-- `Compare neutral vs empathetic`: generates A/B audio players
-- `Sentence-level modulation`: generates clip-by-clip expressive output
+### Render Service Settings
+- **Environment:** Python
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `uvicorn app.web:app --host 0.0.0.0 --port $PORT`
 
-Each generation also exports a report JSON file in `outputs/` with:
-- top-level analysis and cues
-- mapped voice parameters
-- provider and pitch application metadata
-- optional sentence segment breakdown
-```
+### Render Environment Variables
+Set these in Render dashboard:
+- `EMPATHY_TTS_PROVIDER`
+- `ELEVENLABS_API_KEY` (optional)
+- `ELEVENLABS_VOICE_ID` (optional)
+- `ELEVENLABS_MODEL_ID` (optional)
 
-## Deployment Notes
-For assignment-level deployment, Render is the best fit because this is a Python/FastAPI project.
-
-Suggested Render start command:
-
-```bash
-uvicorn app.web:app --host 0.0.0.0 --port $PORT
-```
-
-If you deploy with ElevenLabs, add the same environment variables from `.env` into your hosting provider’s dashboard instead of uploading the `.env` file.
-
-## Key Design Choices
-### Why VADER instead of TextBlob?
-VADER performs well for short conversational text and customer-style messages. It also pairs nicely with lightweight rule-based cues for a fast prototype.
-
-### Why intensity scaling?
-The assignment specifically benefits from modulation that changes with emotional strength. This makes `This is good` sound different from `This is the best news ever!`
-
-### Why support multiple TTS providers?
-- `ElevenLabs`: best voice quality for demos
-- `edge-tts`: practical and free for prototyping
-- `pyttsx3`: offline fallback
-
-This makes the project more robust across local testing, hackathon demos, and deployment.
+### Deployment Notes
+- If ElevenLabs is unavailable, app falls back automatically.
+- `outputs/` directory is created on startup by app code.
+- For stable demos, set provider to `edge` if ElevenLabs quota/account is restricted.
 
 ## Testing
-Run the test suite:
-
+Run all tests:
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-## Current Status
-Completed:
-- project scaffold
-- emotion detection
-- voice mapping
-- audio generation
-- CLI demo
-- FastAPI web demo scaffold
-- optional ElevenLabs support
+## Architecture Notes
+### Emotion Layer
+- Hybrid approach: VADER score + custom lexical cues + emphasis cues.
+- Produces emotion label, confidence, intensity, and explainability cues.
 
-Final polish still recommended:
-- add more web route tests
-- add screenshots to the README
-- deploy to Render
+### Mapping Layer
+- Deterministic mapping from emotion + intensity + persona to voice profile.
+- Controls `rate`, `volume`, and `pitch_delta` consistently.
+
+### Synthesis Layer
+- Uses provider chain with fallbacks.
+- Includes prosody preprocessing for more natural delivery.
+- Returns metadata for UI and JSON reporting.
+
+## Troubleshooting
+### "ElevenLabs was unavailable, generated with edge"
+Possible causes:
+- invalid/restricted API key
+- account restrictions
+- network/proxy issues
+
+Fix:
+1. verify key and account status
+2. test without VPN/proxy
+3. set `EMPATHY_TTS_PROVIDER=edge` for reliable demos
+
+### No audio file generated
+1. check provider config in `.env`
+2. ensure dependencies installed
+3. inspect terminal logs for provider-specific errors
+
+### UI shows stale settings
+1. restart server
+2. hard refresh browser (`Ctrl+F5`)
+
+## Security Notes
+- Never commit real API keys.
+- If a key was exposed, rotate it immediately in provider dashboard.
+- Use environment variables in deployment instead of uploading `.env`.
+
+## Roadmap
+- Real screenshot capture set (post-deployment URLs)
+- Optional latency display in UI
+- Optional waveform visualization
+- Optional API endpoint docs with OpenAPI usage examples
+
+## Acknowledgements
+- VADER Sentiment
+- FastAPI
+- edge-tts
+- ElevenLabs API
 
 ## Repository
-GitHub URL:
-
-```text
-https://github.com/anujsoni3/Voice-emotionAI.git
-```
+GitHub: https://github.com/anujsoni3/Voice-emotionAI.git

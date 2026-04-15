@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Sentence-level Modulation">
+  <rect width="1280" height="720" fill="#f3f6fb"/>
+  <rect x="60" y="50" width="1160" height="620" rx="24" fill="#ffffff" stroke="#d3dae3"/>
+  <text x="95" y="115" font-size="38" font-family="Georgia, serif" fill="#26384c">Sentence-level Modulation</text>
+  <text x="95" y="148" font-size="20" font-family="Segoe UI, sans-serif" fill="#5c6f7f">Each sentence is analyzed and synthesized with its own emotion profile</text>
+
+  <rect x="95" y="190" width="1090" height="130" rx="16" fill="#f9fbff" stroke="#d1deee"/>
+  <text x="120" y="228" font-size="18" font-family="Segoe UI, sans-serif" fill="#49647f">Segment 1</text>
+  <rect x="210" y="206" width="106" height="32" rx="16" fill="#e8f1ff" stroke="#b8cee9"/>
+  <text x="236" y="228" font-size="16" font-family="Segoe UI, sans-serif" fill="#2b5a89">happy</text>
+  <rect x="326" y="206" width="120" height="32" rx="16" fill="#fdebe4" stroke="#efc5b3"/>
+  <text x="360" y="228" font-size="16" font-family="Segoe UI, sans-serif" fill="#964324">strong</text>
+  <text x="120" y="270" font-size="20" font-family="Segoe UI, sans-serif" fill="#304454">This is the best news ever!</text>
+  <text x="120" y="298" font-size="16" font-family="Segoe UI, sans-serif" fill="#5a7083">rate 210 | volume 1.0 | pitch +6</text>
+
+  <rect x="95" y="340" width="1090" height="130" rx="16" fill="#f9fbff" stroke="#d1deee"/>
+  <text x="120" y="378" font-size="18" font-family="Segoe UI, sans-serif" fill="#49647f">Segment 2</text>
+  <rect x="210" y="356" width="130" height="32" rx="16" fill="#e9f4ef" stroke="#bcd8cc"/>
+  <text x="236" y="378" font-size="16" font-family="Segoe UI, sans-serif" fill="#2f6d58">concerned</text>
+  <rect x="350" y="356" width="140" height="32" rx="16" fill="#fff0e7" stroke="#efccb9"/>
+  <text x="388" y="378" font-size="16" font-family="Segoe UI, sans-serif" fill="#9a4b2e">moderate</text>
+  <text x="120" y="420" font-size="20" font-family="Segoe UI, sans-serif" fill="#304454">Please help resolve this issue today.</text>
+  <text x="120" y="448" font-size="16" font-family="Segoe UI, sans-serif" fill="#5a7083">rate 149 | volume 0.93 | pitch -4</text>
+
+  <rect x="95" y="490" width="1090" height="130" rx="16" fill="#f9fbff" stroke="#d1deee"/>
+  <text x="120" y="528" font-size="18" font-family="Segoe UI, sans-serif" fill="#49647f">Segment 3</text>
+  <rect x="210" y="506" width="126" height="32" rx="16" fill="#edf5ff" stroke="#bfd3ea"/>
+  <text x="236" y="528" font-size="16" font-family="Segoe UI, sans-serif" fill="#365f8f">inquisitive</text>
+  <rect x="346" y="506" width="100" height="32" rx="16" fill="#f0f4e9" stroke="#ced9bb"/>
+  <text x="374" y="528" font-size="16" font-family="Segoe UI, sans-serif" fill="#5d7742">mild</text>
+  <text x="120" y="570" font-size="20" font-family="Segoe UI, sans-serif" fill="#304454">Could you confirm the timeline?</text>
+  <text x="120" y="598" font-size="16" font-family="Segoe UI, sans-serif" fill="#5a7083">rate 174 | volume 0.86 | pitch +3</text>
+
+  <text x="60" y="700" font-size="14" font-family="Segoe UI, sans-serif" fill="#6a7a86">Illustrative mock screenshot for documentation</text>
+</svg>

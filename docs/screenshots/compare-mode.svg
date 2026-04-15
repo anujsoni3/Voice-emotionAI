@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Compare Mode">
+  <rect width="1280" height="720" fill="#edf4f8"/>
+  <rect x="60" y="60" width="1160" height="600" rx="24" fill="#ffffff" stroke="#d1d9de"/>
+  <text x="95" y="120" font-size="40" font-family="Georgia, serif" fill="#223446">A/B Compare Mode</text>
+  <text x="95" y="152" font-size="20" font-family="Segoe UI, sans-serif" fill="#5a6b77">Empathetic output vs neutral baseline for quick listening validation</text>
+
+  <rect x="95" y="190" width="520" height="420" rx="18" fill="#f5faf7" stroke="#c8dfd3"/>
+  <text x="125" y="245" font-size="30" font-family="Segoe UI, sans-serif" font-weight="700" fill="#266b4a">Empathetic Output</text>
+  <rect x="125" y="280" width="460" height="96" rx="12" fill="#ffffff" stroke="#c7d8cf"/>
+  <text x="145" y="335" font-size="20" font-family="Segoe UI, sans-serif" fill="#446b57">Audio player: emotion + persona modulation</text>
+  <rect x="125" y="400" width="460" height="180" rx="12" fill="#ffffff" stroke="#c7d8cf"/>
+  <text x="145" y="445" font-size="20" font-family="Segoe UI, sans-serif" fill="#446b57">rate 210 | volume 1.0 | pitch +6</text>
+  <text x="145" y="480" font-size="18" font-family="Segoe UI, sans-serif" fill="#5a7f6d">style: warm, uplift, positive momentum</text>
+
+  <rect x="665" y="190" width="520" height="420" rx="18" fill="#f7f9fc" stroke="#ced9e5"/>
+  <text x="695" y="245" font-size="30" font-family="Segoe UI, sans-serif" font-weight="700" fill="#2f5e7f">Neutral Baseline</text>
+  <rect x="695" y="280" width="460" height="96" rx="12" fill="#ffffff" stroke="#cad7e3"/>
+  <text x="715" y="335" font-size="20" font-family="Segoe UI, sans-serif" fill="#48667c">Audio player: flat neutral reference</text>
+  <rect x="695" y="400" width="460" height="180" rx="12" fill="#ffffff" stroke="#cad7e3"/>
+  <text x="715" y="445" font-size="20" font-family="Segoe UI, sans-serif" fill="#48667c">rate 175 | volume 0.85 | pitch 0</text>
+  <text x="715" y="480" font-size="18" font-family="Segoe UI, sans-serif" fill="#5f7f95">used for side-by-side quality comparison</text>
+
+  <text x="60" y="695" font-size="14" font-family="Segoe UI, sans-serif" fill="#6a7a86">Illustrative mock screenshot for documentation</text>
+</svg>
