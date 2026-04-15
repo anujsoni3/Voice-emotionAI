@@ -6,342 +6,545 @@
     <title>The Empathy Engine</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <style>
+        @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap");
+
         :root {
-            --bg-top: #f5efe6;
-            --bg-bottom: #d7e7f5;
-            --panel: rgba(255, 252, 248, 0.92);
-            --border: rgba(59, 74, 87, 0.14);
-            --text: #1f2a33;
-            --muted: #5e6b75;
-            --accent: #d86c3d;
-            --accent-dark: #b44d22;
-            --accent-soft: #f6d6c9;
-            --success: #2f7d57;
-            --error: #b23a48;
-            --shadow: 0 22px 50px rgba(44, 59, 72, 0.12);
+            --bg-a: #f9f2e8;
+            --bg-b: #d5e9e0;
+            --bg-c: #d7e2f7;
+            --panel: rgba(255, 253, 249, 0.82);
+            --panel-strong: rgba(255, 255, 255, 0.9);
+            --line: rgba(39, 54, 69, 0.14);
+            --text: #1a2732;
+            --muted: #566674;
+            --accent: #d65f2c;
+            --accent-strong: #ab4119;
+            --accent-soft: #fbe1d2;
+            --ok: #266b4a;
+            --error: #9d2f3d;
+            --info: #2f5e7f;
+            --shadow: 0 24px 60px rgba(31, 44, 56, 0.15);
         }
 
         * {
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
+            padding: 0;
+        }
+
+        body {
             min-height: 100vh;
-            font-family: Georgia, "Times New Roman", serif;
+            font-family: "Source Sans 3", "Segoe UI", sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at top left, rgba(216, 108, 61, 0.14), transparent 30%),
-                radial-gradient(circle at bottom right, rgba(73, 132, 183, 0.16), transparent 28%),
-                linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+                radial-gradient(900px 540px at 7% 8%, rgba(214, 95, 44, 0.2), transparent 55%),
+                radial-gradient(760px 520px at 90% 80%, rgba(66, 122, 165, 0.2), transparent 58%),
+                linear-gradient(140deg, var(--bg-a), var(--bg-b) 52%, var(--bg-c));
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 999px;
+            pointer-events: none;
+            filter: blur(2px);
+            opacity: 0.25;
+            z-index: 0;
+        }
+
+        .orb.a {
+            width: 260px;
+            height: 260px;
+            top: 90px;
+            right: 8%;
+            background: linear-gradient(160deg, #f2c8a2, transparent 70%);
+            animation: floatA 8s ease-in-out infinite;
+        }
+
+        .orb.b {
+            width: 320px;
+            height: 320px;
+            bottom: 8%;
+            left: 6%;
+            background: linear-gradient(160deg, #a3c7dd, transparent 70%);
+            animation: floatB 10s ease-in-out infinite;
+        }
+
+        @keyframes floatA {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(12px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes floatB {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
         }
 
         .page {
-            width: min(1100px, calc(100% - 32px));
-            margin: 32px auto;
+            width: min(1180px, calc(100% - 32px));
+            margin: 24px auto 36px;
+            position: relative;
+            z-index: 1;
             display: grid;
-            gap: 24px;
+            gap: 20px;
         }
 
         .hero,
         .panel {
             background: var(--panel);
-            border: 1px solid var(--border);
+            border: 1px solid var(--line);
             border-radius: 24px;
             box-shadow: var(--shadow);
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(9px);
         }
 
         .hero {
-            padding: 32px;
+            padding: 28px 30px;
+            display: grid;
+            gap: 14px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: auto -60px -60px auto;
+            width: 220px;
+            height: 220px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 20% 20%, rgba(214, 95, 44, 0.18), transparent 70%);
         }
 
         .eyebrow {
-            margin: 0 0 10px;
-            font-size: 0.9rem;
-            letter-spacing: 0.16em;
+            margin: 0;
+            color: var(--accent-strong);
             text-transform: uppercase;
-            color: var(--accent-dark);
+            letter-spacing: 0.16em;
+            font-size: 0.78rem;
+            font-weight: 700;
         }
 
         h1 {
             margin: 0;
-            font-size: clamp(2.3rem, 5vw, 4.4rem);
-            line-height: 0.95;
+            font-family: "Fraunces", Georgia, serif;
+            font-size: clamp(2.2rem, 5vw, 4.1rem);
+            line-height: 0.94;
+            letter-spacing: -0.02em;
         }
 
         .hero p {
-            max-width: 720px;
-            margin: 16px 0 0;
-            font-size: 1.05rem;
-            line-height: 1.7;
+            margin: 0;
+            max-width: 760px;
             color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-strip {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hero-chip {
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--line);
+            font-size: 0.84rem;
+            color: #3e5668;
+            font-weight: 600;
         }
 
         .content {
             display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 24px;
+            grid-template-columns: 1.16fr 0.84fr;
+            gap: 20px;
         }
 
         .panel {
-            padding: 24px;
+            padding: 22px;
         }
 
         form {
             display: grid;
-            gap: 16px;
+            gap: 14px;
         }
 
-        label {
-            font-size: 0.95rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
+        .section-title {
+            margin: 0;
+            font-size: 0.82rem;
             text-transform: uppercase;
+            letter-spacing: 0.14em;
             color: var(--muted);
+            font-weight: 700;
         }
 
         textarea {
             width: 100%;
-            min-height: 240px;
-            padding: 18px 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(59, 74, 87, 0.15);
-            background: rgba(255, 255, 255, 0.76);
-            font: inherit;
-            font-size: 1.05rem;
-            line-height: 1.65;
-            resize: vertical;
+            min-height: 230px;
+            padding: 16px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(39, 54, 69, 0.16);
+            background: var(--panel-strong);
             color: var(--text);
+            font: inherit;
+            font-size: 1.04rem;
+            line-height: 1.62;
+            resize: vertical;
+            transition: border-color 180ms ease, box-shadow 180ms ease;
         }
 
         textarea:focus {
-            outline: 2px solid rgba(216, 108, 61, 0.3);
-            border-color: rgba(216, 108, 61, 0.45);
+            outline: none;
+            border-color: rgba(214, 95, 44, 0.55);
+            box-shadow: 0 0 0 3px rgba(214, 95, 44, 0.16);
         }
 
-        .actions {
+        .meta-row {
             display: flex;
-            gap: 12px;
+            justify-content: space-between;
             align-items: center;
+            gap: 12px;
             flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .quick-picks {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.72);
+            color: #314757;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 140ms ease, background 140ms ease;
+        }
+
+        .quick-btn:hover {
+            transform: translateY(-1px);
+            background: #fff;
         }
 
         .control-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
         }
 
         .control {
-            padding: 12px;
+            border: 1px solid var(--line);
             border-radius: 14px;
-            border: 1px solid rgba(59, 74, 87, 0.12);
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.68);
+            padding: 11px 12px;
             display: grid;
             gap: 8px;
+        }
+
+        .control label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            font-weight: 700;
         }
 
         select {
             width: 100%;
-            border: 1px solid rgba(59, 74, 87, 0.2);
-            border-radius: 10px;
-            padding: 8px 10px;
-            background: #fff;
             font: inherit;
+            font-size: 0.95rem;
             color: var(--text);
+            border-radius: 10px;
+            border: 1px solid rgba(39, 54, 69, 0.2);
+            background: #fff;
+            padding: 8px 10px;
         }
 
         .switch {
             display: flex;
-            align-items: center;
             gap: 8px;
-            font-size: 0.95rem;
-            color: var(--text);
+            align-items: center;
             text-transform: none;
             letter-spacing: normal;
+            font-size: 0.93rem;
+            color: var(--text);
             font-weight: 600;
+            margin: 0;
         }
 
-        button {
-            appearance: none;
-            border: 0;
-            border-radius: 999px;
-            padding: 14px 22px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            color: white;
-            font: inherit;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 160ms ease, box-shadow 160ms ease;
-            box-shadow: 0 12px 24px rgba(180, 77, 34, 0.22);
-        }
-
-        button:hover {
-            transform: translateY(-1px);
+        .switch input {
+            accent-color: var(--accent);
+            width: 17px;
+            height: 17px;
         }
 
         .hint {
-            font-size: 0.95rem;
             color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 4px;
+        }
+
+        .submit-btn {
+            appearance: none;
+            border: 0;
+            border-radius: 999px;
+            padding: 13px 22px;
+            background: linear-gradient(130deg, var(--accent), var(--accent-strong));
+            color: #fff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 14px 30px rgba(171, 65, 25, 0.26);
+            transition: transform 150ms ease, box-shadow 150ms ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 34px rgba(171, 65, 25, 0.32);
         }
 
         .status {
-            padding: 14px 16px;
-            border-radius: 16px;
-            font-size: 0.98rem;
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid;
+            font-size: 0.95rem;
             line-height: 1.5;
         }
 
         .status.error {
-            background: rgba(178, 58, 72, 0.08);
+            background: rgba(157, 47, 61, 0.08);
+            border-color: rgba(157, 47, 61, 0.2);
             color: var(--error);
-            border: 1px solid rgba(178, 58, 72, 0.14);
         }
 
         .status.success {
-            background: rgba(47, 125, 87, 0.08);
-            color: var(--success);
-            border: 1px solid rgba(47, 125, 87, 0.16);
+            background: rgba(38, 107, 74, 0.08);
+            border-color: rgba(38, 107, 74, 0.2);
+            color: var(--ok);
         }
 
-        .metrics {
-            display: grid;
-            gap: 14px;
-        }
-
-        .metric-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-        }
-
-        .metric {
-            padding: 16px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.75);
-            border: 1px solid rgba(59, 74, 87, 0.1);
-        }
-
-        .metric span {
-            display: block;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            margin-bottom: 8px;
-        }
-
-        .metric strong {
-            font-size: 1.2rem;
-        }
-
-        .style-note {
-            margin: 0;
-            padding: 16px 18px;
-            border-radius: 18px;
-            background: var(--accent-soft);
-            line-height: 1.7;
-        }
-
-        audio {
-            width: 100%;
-            margin-top: 14px;
-        }
-
-        .chips {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-
-        .chip {
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: rgba(95, 126, 153, 0.12);
-            font-size: 0.9rem;
-            color: var(--muted);
+        .status.info {
+            background: rgba(47, 94, 127, 0.09);
+            border-color: rgba(47, 94, 127, 0.18);
+            color: var(--info);
         }
 
         .compare-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-            margin-top: 14px;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         .audio-card {
-            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.76);
+            padding: 12px;
+        }
+
+        .audio-card strong {
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        audio {
+            width: 100%;
+        }
+
+        .metrics {
+            display: grid;
+            gap: 12px;
+        }
+
+        .metrics h2 {
+            margin: 0;
+            font-family: "Fraunces", Georgia, serif;
+            font-size: 1.6rem;
+            line-height: 1.1;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .metric {
+            border: 1px solid var(--line);
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.75);
-            border: 1px solid rgba(59, 74, 87, 0.1);
+            background: rgba(255, 255, 255, 0.78);
+            padding: 13px;
+        }
+
+        .metric span {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin-bottom: 7px;
+            font-weight: 700;
+        }
+
+        .metric strong {
+            font-size: 1.08rem;
+        }
+
+        .style-note {
+            margin: 0;
+            border: 1px solid rgba(214, 95, 44, 0.24);
+            border-radius: 14px;
+            background: var(--accent-soft);
+            padding: 14px;
+            line-height: 1.55;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 7px 11px;
+            font-size: 0.84rem;
+            color: #40596b;
+            background: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
         }
 
         .segment-list {
             display: grid;
-            gap: 10px;
-            margin-top: 10px;
-            max-height: 340px;
+            gap: 9px;
+            max-height: 320px;
             overflow: auto;
-            padding-right: 4px;
+            padding-right: 2px;
         }
 
         .segment {
-            padding: 12px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.82);
-            border: 1px solid rgba(59, 74, 87, 0.12);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.78);
+            padding: 11px;
         }
 
         .segment p {
             margin: 6px 0;
-            line-height: 1.5;
+            line-height: 1.45;
         }
 
-        @media (max-width: 860px) {
+        .segment strong {
+            font-size: 0.95rem;
+        }
+
+        .empty-state {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        a.download-link {
+            color: #23445d;
+            font-weight: 700;
+        }
+
+        @media (max-width: 980px) {
             .content {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .page {
+                width: min(1160px, calc(100% - 18px));
+                margin-top: 14px;
             }
 
             .hero,
             .panel {
-                padding: 20px;
-                border-radius: 20px;
-            }
-
-            .metric-grid {
-                grid-template-columns: 1fr;
+                border-radius: 18px;
+                padding: 16px;
             }
 
             .control-grid,
+            .metric-grid,
             .compare-grid {
                 grid-template-columns: 1fr;
+            }
+
+            textarea {
+                min-height: 185px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="orb a"></div>
+    <div class="orb b"></div>
+
     <main class="page">
         <section class="hero">
             <p class="eyebrow">Assignment Demo</p>
             <h1>The Empathy Engine</h1>
             <p>
-                Transform plain text into emotionally adaptive speech. This demo detects tone, maps it into voice
-                settings, and generates audio that sounds more patient, upbeat, or neutral depending on the message.
+                Translate plain text into emotionally adaptive speech with clearer intent, richer tone control, and
+                transparent explainability for demos that feel natural instead of robotic.
             </p>
+            <div class="hero-strip">
+                <span class="hero-chip">Emotion Detection</span>
+                <span class="hero-chip">Persona Presets</span>
+                <span class="hero-chip">Compare Mode</span>
+                <span class="hero-chip">Sentence-level Modulation</span>
+            </div>
         </section>
 
         <section class="content">
-            <div class="panel">
+            <section class="panel">
                 <form method="post" action="/generate">
-                    <div>
-                        <label for="text">Input Text</label>
-                        <textarea id="text" name="text" placeholder="Paste a customer message, sales reply, or support update here...">{{ text }}</textarea>
+                    <h2 class="section-title">Input Text</h2>
+                    <textarea id="text" name="text" placeholder="Paste a customer message, sales reply, or support update here...">{{ text }}</textarea>
+
+                    <div class="meta-row">
+                        <span id="charCount">0 characters</span>
+                        <span id="durationHint">Estimated speech: 0s</span>
                     </div>
+
+                    <div class="quick-picks">
+                        <button class="quick-btn" type="button" data-sample="Thanks for your patience. Your issue is now fixed and I appreciate your trust.">Support Sample</button>
+                        <button class="quick-btn" type="button" data-sample="Great news. We are ready to launch your campaign next week and this will improve conversion.">Sales Sample</button>
+                        <button class="quick-btn" type="button" data-sample="Please confirm the revised timeline and share the remaining risks by end of day.">Executive Sample</button>
+                    </div>
+
                     <div class="control-grid">
                         <div class="control">
-                            <label for="persona" style="font-size:0.8rem;">Persona Preset</label>
+                            <label for="persona">Persona Preset</label>
                             <select id="persona" name="persona">
                                 <option value="support" {{ "selected" if persona == "support" else "" }}>Support Agent</option>
                                 <option value="sales" {{ "selected" if persona == "sales" else "" }}>Sales Rep</option>
@@ -349,7 +552,7 @@
                             </select>
                         </div>
                         <div class="control">
-                            <label for="intensity_mode" style="font-size:0.8rem;">Intensity Mode</label>
+                            <label for="intensity_mode">Intensity Mode</label>
                             <select id="intensity_mode" name="intensity_mode">
                                 <option value="auto" {{ "selected" if intensity_mode == "auto" else "" }}>Auto Detect</option>
                                 <option value="mild" {{ "selected" if intensity_mode == "mild" else "" }}>Force Mild</option>
@@ -362,30 +565,30 @@
                                 <input id="compare_mode" type="checkbox" name="compare_mode" {{ "checked" if compare_mode else "" }}>
                                 Compare neutral vs empathetic
                             </label>
-                            <span class="hint">Generates a baseline neutral track for A/B listening.</span>
+                            <span class="hint">Generate a neutral baseline for clear A/B listening.</span>
                         </div>
                         <div class="control">
                             <label class="switch" for="sentence_mode">
                                 <input id="sentence_mode" type="checkbox" name="sentence_mode" {{ "checked" if sentence_mode else "" }}>
                                 Sentence-level modulation
                             </label>
-                            <span class="hint">Creates per-sentence expressive clips for long input.</span>
+                            <span class="hint">Analyze and synthesize each sentence with separate emotion cues.</span>
                         </div>
                     </div>
+
                     <div class="actions">
-                        <button type="submit">Generate Empathetic Voice</button>
+                        <button type="submit" class="submit-btn">Generate Empathetic Voice</button>
                         <span class="hint">Supports auto provider selection, ElevenLabs, and edge-tts fallback.</span>
                     </div>
                 </form>
 
                 {% if error %}
-                <div class="status error" style="margin-top: 18px;">{{ error }}</div>
+                <div class="status error">{{ error }}</div>
                 {% endif %}
 
                 {% if synthesis %}
-                <div class="status success" style="margin-top: 18px;">
-                    Audio generated with <strong>{{ synthesis.provider }}</strong> and saved as
-                    <strong>{{ synthesis.file_name }}</strong>.
+                <div class="status success">
+                    Audio generated with <strong>{{ synthesis.provider }}</strong> and saved as <strong>{{ synthesis.file_name }}</strong>.
                     <div class="compare-grid">
                         <div class="audio-card">
                             <strong>Empathetic Output</strong>
@@ -402,14 +605,12 @@
                 {% endif %}
 
                 {% if fallback_note %}
-                <div class="status" style="margin-top: 14px; background: rgba(73, 132, 183, 0.08); color: #36556d; border: 1px solid rgba(73, 132, 183, 0.16);">
-                    {{ fallback_note }}
-                </div>
+                <div class="status info">{{ fallback_note }}</div>
                 {% endif %}
-            </div>
+            </section>
 
-            <div class="panel metrics">
-                <h2 style="margin: 0; font-size: 1.5rem;">Analysis Output</h2>
+            <aside class="panel metrics">
+                <h2>Analysis Output</h2>
 
                 {% if analysis and voice_profile and synthesis %}
                 <div class="metric-grid">
@@ -454,15 +655,15 @@
                 <p class="style-note">{{ voice_profile.style_note }}</p>
 
                 {% if report_url %}
-                <div class="status" style="background: rgba(73, 132, 183, 0.08); color: #36556d; border: 1px solid rgba(73, 132, 183, 0.16);">
+                <div class="status info">
                     Explainability report ready:
-                    <a href="{{ report_url }}" download style="color:#23445d; font-weight:700;">Download JSON</a>
+                    <a href="{{ report_url }}" download class="download-link">Download JSON</a>
                 </div>
                 {% endif %}
 
                 {% if neutral_profile and neutral_synthesis %}
                 <div>
-                    <span style="display:block; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted);">Compare mode parameters</span>
+                    <h3 class="section-title">Compare Mode Parameters</h3>
                     <div class="chips">
                         <span class="chip">Empathetic: rate {{ voice_profile.rate }}, volume {{ voice_profile.volume }}, pitch {{ voice_profile.pitch_delta }}</span>
                         <span class="chip">Neutral: rate {{ neutral_profile.rate }}, volume {{ neutral_profile.volume }}, pitch {{ neutral_profile.pitch_delta }}</span>
@@ -472,7 +673,7 @@
 
                 {% if analysis.cues %}
                 <div>
-                    <span style="display:block; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted);">Detected cues</span>
+                    <h3 class="section-title">Detected Cues</h3>
                     <div class="chips">
                         {% for cue in analysis.cues %}
                         <span class="chip">{{ cue }}</span>
@@ -483,7 +684,7 @@
 
                 {% if sentence_results %}
                 <div>
-                    <span style="display:block; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted);">Sentence-level modulation</span>
+                    <h3 class="section-title">Sentence-level Modulation</h3>
                     <div class="segment-list">
                         {% for segment in sentence_results %}
                         <article class="segment">
@@ -497,13 +698,39 @@
                 </div>
                 {% endif %}
                 {% else %}
-                <p class="hint" style="line-height: 1.7;">
-                    Submit text to see the detected emotion, intensity, mapped voice parameters, and the generated
-                    audio player here.
+                <p class="empty-state">
+                    Submit text to see the detected emotion, intensity, mapped voice parameters, and generated audio player here.
                 </p>
                 {% endif %}
-            </div>
+            </aside>
         </section>
     </main>
+
+    <script>
+        const textarea = document.getElementById("text");
+        const charCount = document.getElementById("charCount");
+        const durationHint = document.getElementById("durationHint");
+        const sampleButtons = document.querySelectorAll("[data-sample]");
+
+        function updateTextMeta() {
+            const value = textarea.value || "";
+            const chars = value.length;
+            const words = value.trim() ? value.trim().split(/\s+/).length : 0;
+            const seconds = Math.max(0, Math.round((words / 150) * 60));
+            charCount.textContent = chars + " characters";
+            durationHint.textContent = "Estimated speech: " + seconds + "s";
+        }
+
+        sampleButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                textarea.value = button.dataset.sample || "";
+                textarea.focus();
+                updateTextMeta();
+            });
+        });
+
+        textarea.addEventListener("input", updateTextMeta);
+        updateTextMeta();
+    </script>
 </body>
 </html>
