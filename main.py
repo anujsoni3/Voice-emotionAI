@@ -13,6 +13,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("text", nargs="*", help="Text to analyze. If omitted, interactive mode is used.")
     parser.add_argument(
+        "--provider",
+        choices=["auto", "elevenlabs", "edge", "pyttsx3"],
+        help="Choose the speech provider. Defaults to environment configuration or automatic selection.",
+    )
+    parser.add_argument(
         "--preview-only",
         action="store_true",
         help="Skip audio generation and only print the detected emotion and voice settings.",
@@ -28,7 +33,7 @@ def main() -> None:
 
     emotion_service = EmotionService()
     voice_mapper = VoiceMapper()
-    tts_service = TTSService()
+    tts_service = TTSService(provider=args.provider)
 
     analysis = emotion_service.analyze(text)
     voice_profile = voice_mapper.map_emotion(analysis)

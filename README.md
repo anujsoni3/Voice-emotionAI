@@ -9,7 +9,7 @@ Current progress:
 - Phase 1 complete: project scaffold and repository setup
 - Phase 2 complete: emotion detection with intensity scoring
 - Phase 3 complete: emotion-to-voice parameter mapping
-- Phase 4 complete: audio generation using `edge-tts` with parameter modulation
+- Phase 4 complete: audio generation with `edge-tts` and optional ElevenLabs support
 - Phase 5 complete: CLI now generates playable audio
 
 ## Planned Features
@@ -38,6 +38,30 @@ Preview without generating audio:
 ```bash
 python main.py --preview-only "Please confirm the meeting schedule."
 ```
+
+Choose a specific provider from the CLI:
+
+```bash
+python main.py --provider edge "Thanks for your patience."
+python main.py --provider elevenlabs "We are thrilled to share this update with you!"
+```
+
+## ElevenLabs Setup
+The project now supports ElevenLabs as an optional higher-quality voice backend.
+
+Create environment variables using [.env.example](/c:/Users/ANUJ/OneDrive/Desktop/Voice-emotion-ai/.env.example):
+
+```bash
+set ELEVENLABS_API_KEY=your_key_here
+set EMPATHY_TTS_PROVIDER=elevenlabs
+```
+
+Or keep `EMPATHY_TTS_PROVIDER=auto` and the app will prefer ElevenLabs whenever the key is present.
+
+Recommended for assignment demos:
+- keep the current emotion detection logic
+- use ElevenLabs for more human-like voice
+- fall back to `edge-tts` when no API key is available
 
 ## Next Step
 Implement the FastAPI web demo.

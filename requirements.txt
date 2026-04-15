@@ -2,5 +2,6 @@ edge-tts
 fastapi
 jinja2
 pyttsx3
+requests
 uvicorn
 vaderSentiment
