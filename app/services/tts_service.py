@@ -136,17 +136,26 @@ class TTSService:
         return "pyttsx3"
 
     def _provider_chain(self, provider: str) -> list[str]:
-        if provider != "auto":
-            return [provider]
+        if provider == "elevenlabs":
+            preferred = ["elevenlabs", "edge", "pyttsx3"]
+        elif provider == "edge":
+            preferred = ["edge", "pyttsx3"]
+        elif provider == "pyttsx3":
+            preferred = ["pyttsx3"]
+        elif provider == "auto":
+            preferred = ["elevenlabs", "edge", "pyttsx3"]
+        else:
+            preferred = [provider]
 
         chain: list[str] = []
-        if self.settings.elevenlabs_api_key:
-            chain.append("elevenlabs")
-        if edge_tts is not None:
-            chain.append("edge")
-        if platform.startswith("win"):
-            chain.append("pyttsx3")
-        elif "pyttsx3" not in chain:
+        for candidate in preferred:
+            if candidate == "elevenlabs" and not self.settings.elevenlabs_api_key:
+                continue
+            if candidate == "edge" and edge_tts is None:
+                continue
+            chain.append(candidate)
+
+        if "pyttsx3" not in chain:
             chain.append("pyttsx3")
 
         seen: set[str] = set()

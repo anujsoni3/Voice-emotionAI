@@ -121,6 +121,23 @@ class TTSServiceTests(unittest.TestCase):
 
         self.assertEqual(service._resolve_provider(), "elevenlabs")
 
+    def test_elevenlabs_provider_chain_falls_back_to_edge_and_pyttsx3(self) -> None:
+        settings = Settings(tts_provider="elevenlabs", elevenlabs_api_key="test-key")
+        service = TTSService(output_dir="outputs", settings=settings)
+
+        chain = service._provider_chain("elevenlabs")
+
+        self.assertIn("elevenlabs", chain)
+        self.assertIn("pyttsx3", chain)
+
+    def test_edge_provider_chain_includes_pyttsx3_fallback(self) -> None:
+        service = TTSService(output_dir="outputs", provider="edge")
+
+        chain = service._provider_chain("edge")
+
+        self.assertIn("edge", chain)
+        self.assertIn("pyttsx3", chain)
+
     def test_elevenlabs_request_writes_mp3_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             response = Mock()

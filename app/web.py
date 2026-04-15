@@ -219,13 +219,15 @@ async def generate(
     report_url = request.url_for("outputs", path=report_file_name)
     requested_provider = current_tts_service.provider or "auto"
     fallback_note = None
-    if (
-        requested_provider == "auto"
-        and synthesis.provider != "elevenlabs"
-        and current_tts_service.settings.elevenlabs_api_key
-    ):
+    if requested_provider == "auto":
+        auto_primary = "elevenlabs" if current_tts_service.settings.elevenlabs_api_key else "edge"
+        if synthesis.provider != auto_primary:
+            fallback_note = (
+                f"{auto_primary} was unavailable, so the app automatically generated audio with {synthesis.provider}."
+            )
+    elif synthesis.provider != requested_provider:
         fallback_note = (
-            f"ElevenLabs was unavailable, so the app automatically generated audio with {synthesis.provider}."
+            f"{requested_provider} was unavailable, so the app automatically generated audio with {synthesis.provider}."
         )
 
     return templates.TemplateResponse(
