@@ -264,15 +264,56 @@
             font-weight: 700;
         }
 
+        .select-wrap {
+            position: relative;
+        }
+
+        .select-wrap::after {
+            content: "";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            width: 11px;
+            height: 11px;
+            transform: translateY(-60%) rotate(45deg);
+            border-right: 2px solid #6a7d8c;
+            border-bottom: 2px solid #6a7d8c;
+            pointer-events: none;
+            transition: transform 140ms ease, border-color 140ms ease;
+        }
+
         select {
+            appearance: none;
+            -webkit-appearance: none;
             width: 100%;
             font: inherit;
             font-size: 0.95rem;
             color: var(--text);
-            border-radius: 10px;
+            font-weight: 600;
+            border-radius: 12px;
             border: 1px solid rgba(39, 54, 69, 0.2);
-            background: #fff;
-            padding: 8px 10px;
+            background:
+                linear-gradient(180deg, #ffffff, #f4f8fb);
+            padding: 9px 34px 9px 11px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+            cursor: pointer;
+        }
+
+        select:hover {
+            border-color: rgba(39, 54, 69, 0.35);
+            background: linear-gradient(180deg, #ffffff, #eef5fa);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: rgba(214, 95, 44, 0.58);
+            box-shadow: 0 0 0 3px rgba(214, 95, 44, 0.15);
+        }
+
+        .select-wrap:focus-within::after {
+            transform: translateY(-40%) rotate(225deg);
+            border-color: var(--accent-strong);
         }
 
         .switch {
@@ -545,20 +586,24 @@
                     <div class="control-grid">
                         <div class="control">
                             <label for="persona">Persona Preset</label>
-                            <select id="persona" name="persona">
-                                <option value="support" {{ "selected" if persona == "support" else "" }}>Support Agent</option>
-                                <option value="sales" {{ "selected" if persona == "sales" else "" }}>Sales Rep</option>
-                                <option value="executive" {{ "selected" if persona == "executive" else "" }}>Executive Briefing</option>
-                            </select>
+                            <div class="select-wrap">
+                                <select id="persona" name="persona">
+                                    <option value="support" {{ "selected" if persona == "support" else "" }}>Support Agent</option>
+                                    <option value="sales" {{ "selected" if persona == "sales" else "" }}>Sales Rep</option>
+                                    <option value="executive" {{ "selected" if persona == "executive" else "" }}>Executive Briefing</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="control">
                             <label for="intensity_mode">Intensity Mode</label>
-                            <select id="intensity_mode" name="intensity_mode">
-                                <option value="auto" {{ "selected" if intensity_mode == "auto" else "" }}>Auto Detect</option>
-                                <option value="mild" {{ "selected" if intensity_mode == "mild" else "" }}>Force Mild</option>
-                                <option value="moderate" {{ "selected" if intensity_mode == "moderate" else "" }}>Force Moderate</option>
-                                <option value="strong" {{ "selected" if intensity_mode == "strong" else "" }}>Force Strong</option>
-                            </select>
+                            <div class="select-wrap">
+                                <select id="intensity_mode" name="intensity_mode">
+                                    <option value="auto" {{ "selected" if intensity_mode == "auto" else "" }}>Auto Detect</option>
+                                    <option value="mild" {{ "selected" if intensity_mode == "mild" else "" }}>Force Mild</option>
+                                    <option value="moderate" {{ "selected" if intensity_mode == "moderate" else "" }}>Force Moderate</option>
+                                    <option value="strong" {{ "selected" if intensity_mode == "strong" else "" }}>Force Strong</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="control">
                             <label class="switch" for="compare_mode">
