@@ -17,6 +17,7 @@ OUTPUTS_DIR = BASE_DIR / "outputs"
 
 app = FastAPI(title="The Empathy Engine", version="0.1.0")
 app.mount("/outputs", StaticFiles(directory=str(OUTPUTS_DIR)), name="outputs")
+app.mount("/static", StaticFiles(directory=str(Path(__file__).resolve().parent / "static")), name="static")
 
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
 
@@ -76,6 +77,12 @@ async def generate(request: Request, text: str = Form(...)) -> HTMLResponse:
         )
 
     audio_url = request.url_for("outputs", path=synthesis.file_name)
+    requested_provider = tts_service.provider or "auto"
+    fallback_note = None
+    if requested_provider == "auto" and synthesis.provider != "elevenlabs" and tts_service.settings.elevenlabs_api_key:
+        fallback_note = (
+            f"ElevenLabs was unavailable, so the app automatically generated audio with {synthesis.provider}."
+        )
 
     return templates.TemplateResponse(
         request,
@@ -86,6 +93,7 @@ async def generate(request: Request, text: str = Form(...)) -> HTMLResponse:
             "voice_profile": voice_profile,
             "synthesis": synthesis,
             "audio_url": audio_url,
+            "fallback_note": fallback_note,
             "error": None,
         },
     )

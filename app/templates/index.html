@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Empathy Engine</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <style>
         :root {
             --bg-top: #f5efe6;
@@ -277,6 +278,12 @@
                     Audio generated with <strong>{{ synthesis.provider }}</strong> and saved as
                     <strong>{{ synthesis.file_name }}</strong>.
                     <audio controls src="{{ audio_url }}"></audio>
+                </div>
+                {% endif %}
+
+                {% if fallback_note %}
+                <div class="status" style="margin-top: 14px; background: rgba(73, 132, 183, 0.08); color: #36556d; border: 1px solid rgba(73, 132, 183, 0.16);">
+                    {{ fallback_note }}
                 </div>
                 {% endif %}
             </div>

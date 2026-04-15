@@ -36,6 +36,8 @@ class FakeVoiceMapper:
 class FakeTTSService:
     def __init__(self, output_dir: Path) -> None:
         self.output_dir = output_dir
+        self.provider = "auto"
+        self.settings = type("FakeSettings", (), {"elevenlabs_api_key": "test-key"})()
 
     def synthesize_to_file(self, text: str, voice_profile: VoiceProfile) -> SynthesisResult:
         target = self.output_dir / "web-test.mp3"
