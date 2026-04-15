@@ -4,7 +4,12 @@ The Empathy Engine is an emotion-aware speech generation system that converts pl
 
 This project was built for the problem statement: **"The Empathy Engine: Giving AI a Human Voice."**
 
-## Table Of Contents
+## Live Demo
+- App URL: https://voice-emotionai.onrender.com
+- Health URL: https://voice-emotionai.onrender.com/healthz
+
+## Table of Contents
+- [Live Demo](#live-demo)
 - [Why This Project](#why-this-project)
 - [Feature Set](#feature-set)
 - [Screenshots](#screenshots)
@@ -21,6 +26,8 @@ This project was built for the problem statement: **"The Empathy Engine: Giving 
 - [Troubleshooting](#troubleshooting)
 - [Security Notes](#security-notes)
 - [Roadmap](#roadmap)
+- [Acknowledgements](#acknowledgements)
+- [Repository](#repository)
 
 ## Why This Project
 Most default TTS systems sound flat in customer-facing scenarios. This project closes that gap by combining sentiment analysis, rule-based emotional cues, persona presets, and dynamic voice modulation.
