@@ -19,3 +19,14 @@ class VoiceProfile:
     volume: float
     pitch_delta: int
     style_note: str
+
+
+@dataclass(slots=True)
+class SynthesisResult:
+    output_path: str
+    file_name: str
+    provider: str
+    rate: int
+    volume: float
+    pitch_delta: int
+    pitch_applied: bool

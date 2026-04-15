@@ -9,7 +9,8 @@ Current progress:
 - Phase 1 complete: project scaffold and repository setup
 - Phase 2 complete: emotion detection with intensity scoring
 - Phase 3 complete: emotion-to-voice parameter mapping
-- Phase 4 next: playable audio generation
+- Phase 4 complete: audio generation using `edge-tts` with parameter modulation
+- Phase 5 complete: CLI now generates playable audio
 
 ## Planned Features
 - Emotion detection from user text
@@ -19,17 +20,24 @@ Current progress:
 - Web demo with embedded player
 
 ## Current CLI Demo
-Run the text analysis preview:
+Run the full text-to-audio flow:
 
 ```bash
 python main.py "This is the best news ever! Thank you so much!"
 ```
 
-The current CLI prints:
+The current CLI now:
 - detected emotion
 - sentiment score
 - intensity
 - mapped voice parameters
+- saves a playable audio file in `outputs/`
+
+Preview without generating audio:
+
+```bash
+python main.py --preview-only "Please confirm the meeting schedule."
+```
 
 ## Next Step
-Implement the TTS audio generation pipeline.
+Implement the FastAPI web demo.
