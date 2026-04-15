@@ -25,14 +25,14 @@ class FakeEmotionService:
 
 
 class FakeVoiceMapper:
-    def map_emotion(self, analysis: EmotionAnalysis) -> VoiceProfile:
+    def map_emotion(self, analysis: EmotionAnalysis, persona: str = "support") -> VoiceProfile:
         return VoiceProfile(
             emotion=analysis.emotion,
             intensity=analysis.intensity,
-            rate=210,
+            rate=210 if persona != "executive" else 190,
             volume=1.0,
             pitch_delta=6,
-            style_note="Warm and excited.",
+            style_note=f"{persona} persona style.",
         )
 
 
@@ -43,7 +43,7 @@ class FakeTTSService:
         self.settings = type("FakeSettings", (), {"elevenlabs_api_key": "test-key"})()
         self.counter = 0
 
-    def synthesize_to_file(self, text: str, voice_profile: VoiceProfile) -> SynthesisResult:
+    def synthesize_to_file(self, text: str, voice_profile: VoiceProfile, persona: str = "support") -> SynthesisResult:
         self.counter += 1
         target = self.output_dir / f"web-test-{self.counter}.mp3"
         target.write_bytes(b"fake-audio")
@@ -89,6 +89,7 @@ class WebAppTests(unittest.TestCase):
                 "compare_mode": "on",
                 "sentence_mode": "on",
                 "intensity_mode": "moderate",
+                "persona": "executive",
             },
         )
 
@@ -98,6 +99,7 @@ class WebAppTests(unittest.TestCase):
         self.assertIn("Sentence-level modulation", response.text)
         self.assertIn("Download JSON", response.text)
         self.assertIn("happy", response.text)
+        self.assertIn("executive", response.text)
         self.assertIn("web-test-1.mp3", response.text)
 
     def test_generate_requires_non_empty_text(self) -> None:

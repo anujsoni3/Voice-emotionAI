@@ -129,7 +129,7 @@
 
         .control-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 10px;
         }
 
@@ -341,6 +341,14 @@
                     </div>
                     <div class="control-grid">
                         <div class="control">
+                            <label for="persona" style="font-size:0.8rem;">Persona Preset</label>
+                            <select id="persona" name="persona">
+                                <option value="support" {{ "selected" if persona == "support" else "" }}>Support Agent</option>
+                                <option value="sales" {{ "selected" if persona == "sales" else "" }}>Sales Rep</option>
+                                <option value="executive" {{ "selected" if persona == "executive" else "" }}>Executive Briefing</option>
+                            </select>
+                        </div>
+                        <div class="control">
                             <label for="intensity_mode" style="font-size:0.8rem;">Intensity Mode</label>
                             <select id="intensity_mode" name="intensity_mode">
                                 <option value="auto" {{ "selected" if intensity_mode == "auto" else "" }}>Auto Detect</option>
@@ -405,6 +413,10 @@
 
                 {% if analysis and voice_profile and synthesis %}
                 <div class="metric-grid">
+                    <div class="metric">
+                        <span>Persona</span>
+                        <strong>{{ persona }}</strong>
+                    </div>
                     <div class="metric">
                         <span>Emotion</span>
                         <strong>{{ analysis.emotion }}</strong>

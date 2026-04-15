@@ -50,13 +50,35 @@ INTENSITY_ADJUSTMENTS = {
     "strong": {"rate": 15, "volume": 0.06, "pitch_delta": 2},
 }
 
+PERSONA_PRESETS = {
+    "support": {
+        "rate_shift": -5,
+        "volume_shift": 0.02,
+        "pitch_shift": -1,
+        "style_prefix": "Support Agent persona: calm, patient, and reassuring.",
+    },
+    "sales": {
+        "rate_shift": 6,
+        "volume_shift": 0.03,
+        "pitch_shift": 1,
+        "style_prefix": "Sales Rep persona: confident, upbeat, and persuasive.",
+    },
+    "executive": {
+        "rate_shift": -2,
+        "volume_shift": 0.0,
+        "pitch_shift": -1,
+        "style_prefix": "Executive Briefing persona: composed, concise, and authoritative.",
+    },
+}
+
 
 class VoiceMapper:
     """Maps emotion analysis to speech settings for the TTS layer."""
 
-    def map_emotion(self, analysis: EmotionAnalysis) -> VoiceProfile:
+    def map_emotion(self, analysis: EmotionAnalysis, persona: str = "support") -> VoiceProfile:
         base = BASE_PROFILES[analysis.emotion]
         adjustment = INTENSITY_ADJUSTMENTS[analysis.intensity]
+        persona_config = PERSONA_PRESETS.get(persona, PERSONA_PRESETS["support"])
 
         if analysis.emotion in {"frustrated", "concerned"}:
             rate = base["rate"] - adjustment["rate"]
@@ -75,14 +97,18 @@ class VoiceMapper:
             volume = min(1.0, base["volume"] + adjustment["volume"] / 2)
             pitch_delta = base["pitch_delta"]
 
+        rate = max(120, min(240, rate + persona_config["rate_shift"]))
+        volume = max(0.5, min(1.0, volume + persona_config["volume_shift"]))
+        pitch_delta = max(-8, min(8, pitch_delta + persona_config["pitch_shift"]))
+
         return VoiceProfile(
             emotion=analysis.emotion,
             intensity=analysis.intensity,
             rate=rate,
             volume=round(volume, 2),
             pitch_delta=pitch_delta,
-            style_note=base["style_note"],
+            style_note=f"{persona_config['style_prefix']} {base['style_note']}",
         )
 
-    def map_as_dict(self, analysis: EmotionAnalysis) -> dict[str, object]:
-        return asdict(self.map_emotion(analysis))
+    def map_as_dict(self, analysis: EmotionAnalysis, persona: str = "support") -> dict[str, object]:
+        return asdict(self.map_emotion(analysis, persona=persona))

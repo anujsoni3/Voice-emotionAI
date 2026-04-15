@@ -36,6 +36,12 @@ def parse_args() -> argparse.Namespace:
         default="auto",
         help="Force intensity level instead of auto detection.",
     )
+    parser.add_argument(
+        "--persona",
+        choices=["support", "sales", "executive"],
+        default="support",
+        help="Select speaking persona preset.",
+    )
     return parser.parse_args()
 
 
@@ -57,7 +63,7 @@ def main() -> None:
 
     intensity_override = None if args.intensity == "auto" else args.intensity
     analysis = emotion_service.analyze(text, intensity_override=intensity_override)
-    voice_profile = voice_mapper.map_emotion(analysis)
+    voice_profile = voice_mapper.map_emotion(analysis, persona=args.persona)
 
     print("\nThe Empathy Engine analysis")
     print(f"Text: {analysis.text}")
@@ -69,6 +75,7 @@ def main() -> None:
     print(f"Voice volume: {voice_profile.volume}")
     print(f"Pitch delta: {voice_profile.pitch_delta}")
     print(f"Style note: {voice_profile.style_note}")
+    print(f"Persona: {args.persona}")
 
     if analysis.cues:
         print(f"Detected cues: {', '.join(analysis.cues)}")
@@ -78,7 +85,7 @@ def main() -> None:
         return
 
     print(f"\nGenerating audio with provider: {cli_provider}")
-    synthesis = tts_service.synthesize_to_file(analysis.text, voice_profile)
+    synthesis = tts_service.synthesize_to_file(analysis.text, voice_profile, persona=args.persona)
     print(f"\nAudio file generated: {synthesis.output_path}")
     print(f"TTS provider: {synthesis.provider}")
     print(f"Pitch applied directly: {synthesis.pitch_applied}")

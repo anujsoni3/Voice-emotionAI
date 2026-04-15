@@ -36,6 +36,7 @@ async def home(request: Request) -> HTMLResponse:
         "index.html",
         {
             "text": "",
+            "persona": "support",
             "intensity_mode": "auto",
             "compare_mode": True,
             "sentence_mode": True,
@@ -56,11 +57,13 @@ async def generate(
     request: Request,
     text: str = Form(...),
     intensity_mode: str = Form("auto"),
+    persona: str = Form("support"),
     compare_mode: bool = Form(False),
     sentence_mode: bool = Form(False),
 ) -> HTMLResponse:
     cleaned_text = text.strip()
     selected_intensity = intensity_mode if intensity_mode in {"auto", "mild", "moderate", "strong"} else "auto"
+    selected_persona = persona if persona in {"support", "sales", "executive"} else "support"
     intensity_override = None if selected_intensity == "auto" else selected_intensity
 
     if not cleaned_text:
@@ -69,6 +72,7 @@ async def generate(
             "index.html",
             {
                 "text": text,
+                "persona": selected_persona,
                 "intensity_mode": selected_intensity,
                 "compare_mode": compare_mode,
                 "sentence_mode": sentence_mode,
@@ -86,8 +90,8 @@ async def generate(
 
     try:
         analysis = emotion_service.analyze(cleaned_text, intensity_override=intensity_override)
-        voice_profile = voice_mapper.map_emotion(analysis)
-        synthesis = tts_service.synthesize_to_file(cleaned_text, voice_profile)
+        voice_profile = voice_mapper.map_emotion(analysis, persona=selected_persona)
+        synthesis = tts_service.synthesize_to_file(cleaned_text, voice_profile, persona=selected_persona)
 
         neutral_analysis = EmotionAnalysis(
             text=cleaned_text,
@@ -97,15 +101,19 @@ async def generate(
             confidence=1.0,
             cues=["baseline_neutral"],
         )
-        neutral_profile = voice_mapper.map_emotion(neutral_analysis)
-        neutral_synthesis = tts_service.synthesize_to_file(cleaned_text, neutral_profile) if compare_mode else None
+        neutral_profile = voice_mapper.map_emotion(neutral_analysis, persona=selected_persona)
+        neutral_synthesis = (
+            tts_service.synthesize_to_file(cleaned_text, neutral_profile, persona=selected_persona)
+            if compare_mode
+            else None
+        )
 
         sentence_results: list[dict[str, object]] = []
         if sentence_mode:
             for idx, sentence_text in enumerate(emotion_service.split_sentences(cleaned_text), start=1):
                 sentence_analysis = emotion_service.analyze(sentence_text, intensity_override=intensity_override)
-                sentence_profile = voice_mapper.map_emotion(sentence_analysis)
-                sentence_synthesis = tts_service.synthesize_to_file(sentence_text, sentence_profile)
+                sentence_profile = voice_mapper.map_emotion(sentence_analysis, persona=selected_persona)
+                sentence_synthesis = tts_service.synthesize_to_file(sentence_text, sentence_profile, persona=selected_persona)
                 sentence_results.append(
                     {
                         "index": idx,
@@ -121,6 +129,7 @@ async def generate(
             "input_text": cleaned_text,
             "options": {
                 "intensity_mode": selected_intensity,
+                "persona": selected_persona,
                 "compare_mode": compare_mode,
                 "sentence_mode": sentence_mode,
             },
@@ -165,6 +174,7 @@ async def generate(
             "index.html",
             {
                 "text": cleaned_text,
+                "persona": selected_persona,
                 "intensity_mode": selected_intensity,
                 "compare_mode": compare_mode,
                 "sentence_mode": sentence_mode,
@@ -195,6 +205,7 @@ async def generate(
         "index.html",
         {
             "text": cleaned_text,
+            "persona": selected_persona,
             "intensity_mode": selected_intensity,
             "compare_mode": compare_mode,
             "sentence_mode": sentence_mode,

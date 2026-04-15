@@ -58,10 +58,11 @@ class TTSService:
         if http_session is None:
             self.http_session.trust_env = False
 
-    def synthesize_to_file(self, text: str, voice_profile: VoiceProfile) -> SynthesisResult:
+    def synthesize_to_file(self, text: str, voice_profile: VoiceProfile, persona: str = "support") -> SynthesisResult:
         cleaned_text = text.strip()
         if not cleaned_text:
             raise ValueError("Text input cannot be empty.")
+        prepared_text = self._enhance_text_prosody(cleaned_text, voice_profile, persona)
 
         selected_provider = self.provider or "auto"
         attempted_providers = self._provider_chain(selected_provider)
@@ -74,13 +75,13 @@ class TTSService:
             output_path = self.build_output_path(cleaned_text, candidate)
             try:
                 if candidate == "elevenlabs":
-                    self._synthesize_with_elevenlabs(cleaned_text, voice_profile, output_path)
+                    self._synthesize_with_elevenlabs(prepared_text, voice_profile, output_path)
                     pitch_applied = True
                 elif candidate == "edge":
-                    self._synthesize_with_edge_tts(cleaned_text, voice_profile, output_path)
+                    self._synthesize_with_edge_tts(prepared_text, voice_profile, output_path)
                     pitch_applied = True
                 else:
-                    self._synthesize_with_pyttsx3(cleaned_text, voice_profile, output_path)
+                    self._synthesize_with_pyttsx3(prepared_text, voice_profile, output_path)
                     pitch_applied = False
             except RuntimeError as exc:
                 last_error = exc
@@ -289,3 +290,32 @@ class TTSService:
     @staticmethod
     def as_dict(result: SynthesisResult) -> dict[str, object]:
         return asdict(result)
+
+    @staticmethod
+    def _enhance_text_prosody(text: str, voice_profile: VoiceProfile, persona: str) -> str:
+        normalized = " ".join(text.split())
+        if not normalized:
+            return text
+
+        # Insert pause hints after common clause boundaries for smoother pacing.
+        normalized = re.sub(r",\s*", ", ", normalized)
+        normalized = re.sub(r"\s+(and|but|because|however|therefore|so)\s+", r", \1 ", normalized, flags=re.IGNORECASE)
+
+        if normalized[-1] not in ".!?":
+            normalized = f"{normalized}."
+
+        if voice_profile.emotion in {"frustrated", "concerned"}:
+            normalized = re.sub(r"!+", ".", normalized)
+
+        if voice_profile.emotion in {"happy", "surprised"} and "!" not in normalized:
+            normalized = normalized[:-1] + "!"
+
+        persona_prefix = {
+            "support": "Let me walk you through this clearly.",
+            "sales": "Here is the exciting part.",
+            "executive": "Key update.",
+        }.get(persona, "")
+
+        if persona_prefix:
+            return f"{persona_prefix} {normalized}"
+        return normalized

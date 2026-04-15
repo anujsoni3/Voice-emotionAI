@@ -24,8 +24,8 @@ class VoiceMapperTests(unittest.TestCase):
             confidence=0.6,
         )
 
-        happy_profile = self.mapper.map_emotion(happy)
-        neutral_profile = self.mapper.map_emotion(neutral)
+        happy_profile = self.mapper.map_emotion(happy, persona="sales")
+        neutral_profile = self.mapper.map_emotion(neutral, persona="support")
 
         self.assertGreater(happy_profile.rate, neutral_profile.rate)
         self.assertGreaterEqual(happy_profile.volume, neutral_profile.volume)
@@ -46,8 +46,8 @@ class VoiceMapperTests(unittest.TestCase):
             confidence=0.6,
         )
 
-        frustrated_profile = self.mapper.map_emotion(frustrated)
-        neutral_profile = self.mapper.map_emotion(neutral)
+        frustrated_profile = self.mapper.map_emotion(frustrated, persona="support")
+        neutral_profile = self.mapper.map_emotion(neutral, persona="sales")
 
         self.assertLess(frustrated_profile.rate, neutral_profile.rate)
         self.assertLess(frustrated_profile.pitch_delta, neutral_profile.pitch_delta)
@@ -68,8 +68,8 @@ class VoiceMapperTests(unittest.TestCase):
             confidence=0.8,
         )
 
-        surprised_profile = self.mapper.map_emotion(surprised)
-        happy_profile = self.mapper.map_emotion(happy)
+        surprised_profile = self.mapper.map_emotion(surprised, persona="sales")
+        happy_profile = self.mapper.map_emotion(happy, persona="support")
 
         self.assertGreaterEqual(surprised_profile.pitch_delta, happy_profile.pitch_delta)
 
@@ -89,8 +89,8 @@ class VoiceMapperTests(unittest.TestCase):
             confidence=0.6,
         )
 
-        concerned_profile = self.mapper.map_emotion(concerned)
-        neutral_profile = self.mapper.map_emotion(neutral)
+        concerned_profile = self.mapper.map_emotion(concerned, persona="support")
+        neutral_profile = self.mapper.map_emotion(neutral, persona="sales")
 
         self.assertLess(concerned_profile.rate, neutral_profile.rate)
 
@@ -103,9 +103,23 @@ class VoiceMapperTests(unittest.TestCase):
             confidence=0.78,
         )
 
-        profile = self.mapper.map_emotion(inquisitive)
+        profile = self.mapper.map_emotion(inquisitive, persona="executive")
 
         self.assertGreater(profile.pitch_delta, 0)
+
+    def test_sales_persona_is_faster_than_support_persona(self) -> None:
+        analysis = EmotionAnalysis(
+            text="Thanks for the update.",
+            emotion="neutral",
+            sentiment_score=0.0,
+            intensity="mild",
+            confidence=0.7,
+        )
+
+        support_profile = self.mapper.map_emotion(analysis, persona="support")
+        sales_profile = self.mapper.map_emotion(analysis, persona="sales")
+
+        self.assertGreater(sales_profile.rate, support_profile.rate)
 
 
 if __name__ == "__main__":

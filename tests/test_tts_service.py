@@ -72,12 +72,42 @@ class TTSServiceTests(unittest.TestCase):
                 style_note="Warm and excited.",
             )
 
-            result = service.synthesize_to_file("Thank you for the wonderful update!", profile)
+            result = service.synthesize_to_file("Thank you for the wonderful update!", profile, persona="sales")
 
             self.assertTrue(Path(result.output_path).exists())
             self.assertEqual(fake_engine.properties["rate"], 203)
             self.assertEqual(fake_engine.properties["volume"], 0.92)
             self.assertFalse(result.pitch_applied)
+
+    def test_prosody_enhancer_adds_persona_prefix(self) -> None:
+        profile = VoiceProfile(
+            emotion="happy",
+            intensity="moderate",
+            rate=203,
+            volume=0.92,
+            pitch_delta=5,
+            style_note="Warm and excited.",
+        )
+
+        text = TTSService._enhance_text_prosody("this is a great update", profile, persona="sales")
+
+        self.assertTrue(text.startswith("Here is the exciting part."))
+        self.assertTrue(text.endswith("!"))
+
+    def test_prosody_enhancer_softens_concerned_exclamation(self) -> None:
+        profile = VoiceProfile(
+            emotion="concerned",
+            intensity="strong",
+            rate=150,
+            volume=0.9,
+            pitch_delta=-3,
+            style_note="Calm and reassuring.",
+        )
+
+        text = TTSService._enhance_text_prosody("Please help immediately!", profile, persona="support")
+
+        self.assertIn("Let me walk you through this clearly.", text)
+        self.assertNotIn("!", text)
 
     def test_edge_rate_conversion_is_clamped(self) -> None:
         service = TTSService(output_dir="outputs")
@@ -116,7 +146,7 @@ class TTSServiceTests(unittest.TestCase):
                 style_note="Warm and excited.",
             )
 
-            result = service.synthesize_to_file("Thank you for the wonderful update!", profile)
+            result = service.synthesize_to_file("Thank you for the wonderful update!", profile, persona="sales")
 
             self.assertTrue(Path(result.output_path).exists())
             self.assertEqual(Path(result.output_path).suffix, ".mp3")
@@ -148,7 +178,7 @@ class TTSServiceTests(unittest.TestCase):
                 style_note="Warm and excited.",
             )
 
-            result = service.synthesize_to_file("Thank you for the wonderful update!", profile)
+            result = service.synthesize_to_file("Thank you for the wonderful update!", profile, persona="sales")
 
             self.assertEqual(result.provider, "edge")
             self.assertTrue(Path(result.output_path).exists())
