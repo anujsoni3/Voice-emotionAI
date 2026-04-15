@@ -479,6 +479,99 @@
             transition: transform 150ms ease, box-shadow 150ms ease;
         }
 
+        .submit-btn.loading {
+            opacity: 0.92;
+            cursor: wait;
+            pointer-events: none;
+        }
+
+        .btn-loader {
+            width: 14px;
+            height: 14px;
+            border-radius: 999px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-top-color: #ffffff;
+            animation: spin 800ms linear infinite;
+            display: none;
+        }
+
+        .submit-btn.loading .btn-loader {
+            display: inline-block;
+        }
+
+        .btn-label-loading {
+            display: none;
+        }
+
+        .submit-btn.loading .btn-label-default {
+            display: none;
+        }
+
+        .submit-btn.loading .btn-label-loading {
+            display: inline;
+        }
+
+        .submit-btn-inner {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .submit-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(20, 30, 40, 0.28);
+            backdrop-filter: blur(4px);
+        }
+
+        .submit-overlay.show {
+            display: flex;
+        }
+
+        .overlay-card {
+            width: min(360px, calc(100% - 24px));
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 48px rgba(16, 28, 38, 0.28);
+            padding: 16px;
+            display: grid;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .overlay-spinner {
+            margin: 0 auto;
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            border: 3px solid rgba(214, 95, 44, 0.22);
+            border-top-color: var(--accent);
+            animation: spin 800ms linear infinite;
+        }
+
+        .overlay-title {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.02rem;
+            color: #243645;
+        }
+
+        .overlay-subtitle {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .submit-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 16px 34px rgba(171, 65, 25, 0.32);
@@ -798,7 +891,7 @@
 
         <section class="content">
             <section class="panel">
-                <form method="post" action="/generate">
+                <form id="generateForm" method="post" action="/generate">
                     <h2 class="section-title">Input Text</h2>
                     <textarea id="text" name="text" placeholder="Paste a customer message, sales reply, or support update here...">{{ text }}</textarea>
 
@@ -850,7 +943,13 @@
                     </div>
 
                     <div class="actions">
-                        <button type="submit" class="submit-btn">Generate Empathetic Voice</button>
+                        <button id="generateButton" type="submit" class="submit-btn">
+                            <span class="submit-btn-inner">
+                                <span class="btn-loader" aria-hidden="true"></span>
+                                <span class="btn-label-default">Generate Empathetic Voice</span>
+                                <span class="btn-label-loading">Generating empathetic voice...</span>
+                            </span>
+                        </button>
                         <span class="hint">Supports auto provider selection, ElevenLabs, and edge-tts fallback.</span>
                     </div>
                 </form>
@@ -991,7 +1090,18 @@
         </section>
     </main>
 
+    <div id="submitOverlay" class="submit-overlay" aria-hidden="true">
+        <div class="overlay-card" role="status" aria-live="polite">
+            <div class="overlay-spinner" aria-hidden="true"></div>
+            <p class="overlay-title">Generating empathetic voice</p>
+            <p class="overlay-subtitle">Analyzing emotion, mapping voice profile, and synthesizing audio...</p>
+        </div>
+    </div>
+
     <script>
+        const generateForm = document.getElementById("generateForm");
+        const generateButton = document.getElementById("generateButton");
+        const submitOverlay = document.getElementById("submitOverlay");
         const textarea = document.getElementById("text");
         const charCount = document.getElementById("charCount");
         const durationHint = document.getElementById("durationHint");
@@ -1059,6 +1169,16 @@
         textarea.addEventListener("input", updateTextMeta);
         bindChoiceGroup(personaChoices, personaInput);
         bindChoiceGroup(intensityChoices, intensityInput);
+
+        if (generateForm && generateButton && submitOverlay) {
+            generateForm.addEventListener("submit", () => {
+                generateButton.classList.add("loading");
+                generateButton.setAttribute("disabled", "disabled");
+                submitOverlay.classList.add("show");
+                submitOverlay.setAttribute("aria-hidden", "false");
+            });
+        }
+
         updateTextMeta();
     </script>
 </body>
