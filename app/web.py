@@ -17,6 +17,7 @@ from app.models import EmotionAnalysis
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 OUTPUTS_DIR = BASE_DIR / "outputs"
+OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="The Empathy Engine", version="0.1.0")
 app.mount("/outputs", StaticFiles(directory=str(OUTPUTS_DIR)), name="outputs")
