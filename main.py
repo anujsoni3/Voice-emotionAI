@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 
+import uvicorn
+
 from app.services.emotion_service import EmotionService
 from app.services.tts_service import TTSService
 from app.services.voice_mapper import VoiceMapper
@@ -12,6 +14,11 @@ def parse_args() -> argparse.Namespace:
         description="Analyze text emotion and preview the voice settings for The Empathy Engine."
     )
     parser.add_argument("text", nargs="*", help="Text to analyze. If omitted, interactive mode is used.")
+    parser.add_argument(
+        "--web",
+        action="store_true",
+        help="Launch the FastAPI web demo instead of the CLI flow.",
+    )
     parser.add_argument(
         "--provider",
         choices=["auto", "elevenlabs", "edge", "pyttsx3"],
@@ -27,6 +34,10 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if args.web:
+        uvicorn.run("app.web:app", host="127.0.0.1", port=8000, reload=False)
+        return
+
     text = " ".join(args.text).strip()
     if not text:
         text = input("Enter text for the Empathy Engine: ").strip()
