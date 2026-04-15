@@ -1,0 +1,5 @@
+fastapi
+jinja2
+pyttsx3
+uvicorn
+vaderSentiment
