@@ -8,6 +8,8 @@ from pathlib import Path
 from sys import platform
 from typing import Callable
 
+import requests
+
 from app.models import SynthesisResult, VoiceProfile
 from app.settings import Settings
 
@@ -33,12 +35,14 @@ class TTSService:
         provider: str | None = None,
         engine_factory: Callable[[], object] | None = None,
         settings: Settings | None = None,
+        http_session: requests.sessions.Session | None = None,
     ) -> None:
         self.settings = settings or Settings.from_env()
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.provider = provider or self.settings.tts_provider
         self.engine_factory = engine_factory or self._default_engine_factory
+        self.http_session = http_session or requests.Session()
 
     def synthesize_to_file(self, text: str, voice_profile: VoiceProfile) -> SynthesisResult:
         cleaned_text = text.strip()
@@ -48,7 +52,10 @@ class TTSService:
         provider = self._resolve_provider()
         output_path = self.build_output_path(cleaned_text, provider)
 
-        if provider == "edge":
+        if provider == "elevenlabs":
+            self._synthesize_with_elevenlabs(cleaned_text, voice_profile, output_path)
+            pitch_applied = True
+        elif provider == "edge":
             self._synthesize_with_edge_tts(cleaned_text, voice_profile, output_path)
             pitch_applied = True
         else:
@@ -75,7 +82,7 @@ class TTSService:
         slug = self._slugify(text)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         resolved_provider = provider or self._resolve_provider()
-        extension = ".mp3" if resolved_provider == "edge" else ".wav"
+        extension = ".mp3" if resolved_provider in {"edge", "elevenlabs"} else ".wav"
         return self.output_dir / f"{timestamp}_{slug}{extension}"
 
     def _default_engine_factory(self) -> object:
@@ -88,6 +95,8 @@ class TTSService:
     def _resolve_provider(self) -> str:
         if self.provider != "auto":
             return self.provider
+        if self.settings.elevenlabs_api_key:
+            return "elevenlabs"
         if edge_tts is not None:
             return "edge"
         if platform.startswith("win"):
@@ -127,6 +136,37 @@ class TTSService:
                 "Edge TTS synthesis failed. Check your internet connection or switch to the preview mode."
             ) from exc
 
+    def _synthesize_with_elevenlabs(self, text: str, voice_profile: VoiceProfile, output_path: Path) -> None:
+        if not self.settings.elevenlabs_api_key:
+            raise RuntimeError(
+                "ElevenLabs provider selected, but `ELEVENLABS_API_KEY` is not set."
+            )
+
+        url = (
+            f"https://api.elevenlabs.io/v1/text-to-speech/"
+            f"{self.settings.elevenlabs_voice_id}?output_format=mp3_44100_128"
+        )
+        headers = {
+            "xi-api-key": self.settings.elevenlabs_api_key,
+            "Content-Type": "application/json",
+            "Accept": "audio/mpeg",
+        }
+        payload = {
+            "text": text,
+            "model_id": self.settings.elevenlabs_model_id,
+            "voice_settings": self._elevenlabs_voice_settings(voice_profile),
+        }
+
+        try:
+            response = self.http_session.post(url, headers=headers, json=payload, timeout=90)
+            response.raise_for_status()
+        except requests.RequestException as exc:
+            raise RuntimeError(
+                "ElevenLabs synthesis failed. Check the API key, voice id, model id, or network access."
+            ) from exc
+
+        output_path.write_bytes(response.content)
+
     @staticmethod
     def _to_edge_rate(rate: int) -> str:
         percent = max(-50, min(50, round((rate - 175) / 1.75)))
@@ -141,6 +181,33 @@ class TTSService:
     def _to_edge_pitch(pitch_delta: int) -> str:
         hz = max(-20, min(20, pitch_delta * 4))
         return f"{hz:+d}Hz"
+
+    @staticmethod
+    def _elevenlabs_voice_settings(voice_profile: VoiceProfile) -> dict[str, float | bool]:
+        speed = max(0.7, min(1.2, round(voice_profile.rate / 175, 2)))
+        stability = {
+            "happy": 0.35,
+            "neutral": 0.6,
+            "frustrated": 0.7,
+        }.get(voice_profile.emotion, 0.6)
+        similarity_boost = {
+            "happy": 0.8,
+            "neutral": 0.78,
+            "frustrated": 0.82,
+        }.get(voice_profile.emotion, 0.78)
+        style = {
+            "mild": 0.1,
+            "moderate": 0.28,
+            "strong": 0.45,
+        }.get(voice_profile.intensity, 0.2)
+
+        return {
+            "stability": stability,
+            "similarity_boost": similarity_boost,
+            "style": style,
+            "speed": speed,
+            "use_speaker_boost": True,
+        }
 
     @staticmethod
     def _slugify(text: str) -> str:
