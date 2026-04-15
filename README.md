@@ -19,6 +19,8 @@ Bonus features included:
 - `A/B Compare Mode`: generates neutral baseline and empathetic output for side-by-side listening
 - `Sentence-Level Modulation`: generates per-sentence expressive clips for long inputs
 - `Explainability Export`: writes a downloadable JSON report with cues, mappings, and provider metadata
+- `Persona Presets`: supports `support`, `sales`, and `executive` speaking styles
+- `Prosody Enhancer`: applies clause pauses and phrasing refinement before synthesis
 - `Provider Flexibility`: supports `edge-tts`, `pyttsx3`, and optional `ElevenLabs`
 
 ## Project Structure
@@ -138,6 +140,12 @@ Force an intensity level manually:
 ```bash
 python main.py --preview-only --intensity strong "Please confirm the meeting schedule for tomorrow."
 ```
+
+Select a persona preset:
+
+```bash
+python main.py --preview-only --persona executive "Please confirm the meeting schedule for tomorrow."
+```
 ```
 
 Force a specific TTS provider:
@@ -160,6 +168,7 @@ Then open:
 http://127.0.0.1:8000
 
 Web controls include:
+- `Persona Preset`: support, sales, executive
 - `Intensity Mode`: auto, mild, moderate, strong
 - `Compare neutral vs empathetic`: generates A/B audio players
 - `Sentence-level modulation`: generates clip-by-clip expressive output
